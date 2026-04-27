@@ -167,6 +167,54 @@ a:hover { text-decoration: underline; }
   line-height: 1.6;
 }
 
+/* ── Use Cases ── */
+.usecases {
+  background: var(--card);
+  border-top: 1px solid var(--divider);
+  padding: 80px 24px;
+}
+.usecases-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.usecases h2 {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+.usecases .section-sub {
+  text-align: center;
+  color: var(--text-secondary);
+  margin-bottom: 48px;
+  font-size: 15px;
+}
+.usecase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+.usecase-card {
+  background: var(--bg);
+  border-radius: 16px;
+  padding: 28px;
+}
+.usecase-emoji {
+  font-size: 32px;
+  margin-bottom: 14px;
+}
+.usecase-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.usecase-card p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  font-style: italic;
+}
+
 /* ── Stats ── */
 .stats {
   background: var(--card);
@@ -184,14 +232,14 @@ a:hover { text-decoration: underline; }
   gap: 32px;
 }
 .stat-item .stat-value {
-  font-size: 36px;
+  font-size: 32px;
   font-weight: 800;
   color: var(--primary);
 }
 .stat-item .stat-label {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-secondary);
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 /* ── About ── */
