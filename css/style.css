@@ -259,6 +259,16 @@ a:hover { text-decoration: underline; }
   color: var(--text-secondary);
   line-height: 1.8;
 }
+.about p .accent {
+  color: var(--primary-dark);
+}
+.about .about-vision {
+  margin-top: 24px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
 
 /* ── CTA Banner ── */
 .cta-banner {
