@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.dadaring.app",
+      "sha256_cert_fingerprints": [
+        "3A:22:51:A8:44:92:32:9B:D6:2F:C2:7F:DD:59:12:A3:E9:75:91:8C:6F:4B:91:4D:CB:EF:79:6C:70:00:FF:71"
+      ]
+    }
+  }
+]
