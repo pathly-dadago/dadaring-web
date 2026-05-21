@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>다다링 앱 - 아이의 하루를 스마트하게</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+  <script>
+    (function () {
+      var ua = navigator.userAgent || '';
+      var isIOS = /iphone|ipad|ipod/i.test(ua);
+      var isAndroid = /android/i.test(ua);
+      var playUrl = 'https://play.google.com/store/apps/details?id=com.dadaring.app';
+      var appleUrl = 'https://apps.apple.com/app/id6769691549';
+
+      if (isIOS) {
+        window.location.replace(appleUrl);
+      } else if (isAndroid) {
+        window.location.replace(playUrl);
+      }
+      // Desktop & 기타: 페이지 내용 그대로 노출 (양쪽 스토어 버튼 보여줌)
+    })();
+  </script>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">DADAring</a>
+  </div>
+</nav>
+
+<section class="hero" style="padding-top: 120px;">
+  <div style="font-size: 48px; margin-bottom: 16px;">📲</div>
+  <h1 style="font-size: 28px;">다다링 앱</h1>
+  <p class="subtitle">
+    아이의 하루를 스마트하게 — 일정·할일·공유.<br>
+    아래 스토어에서 설치해주세요.
+  </p>
+
+  <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 32px;">
+    <a href="https://apps.apple.com/app/id6769691549"
+       class="hero-cta"
+       style="background: #000; text-decoration: none;">
+      🍎 App Store
+    </a>
+    <a href="https://play.google.com/store/apps/details?id=com.dadaring.app"
+       class="hero-cta"
+       style="background: #000; text-decoration: none;">
+      🤖 Google Play
+    </a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-bottom">
+    &copy; 2026 DADAGO. All rights reserved.
+  </div>
+</footer>
+
+</body>
+</html>
