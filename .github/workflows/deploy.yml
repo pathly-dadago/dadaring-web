@@ -18,7 +18,16 @@ jobs:
           aws-region: ap-northeast-2
 
       - name: Sync to S3
-        run: aws s3 sync . s3://dadaring-web-prod --exclude ".git/*" --exclude ".github/*" --delete
+        run: aws s3 sync . s3://dadaring-web-prod --exclude ".git/*" --exclude ".github/*" --exclude "*.md" --exclude "cloudfront-*.json" --exclude "cloudfront-routing-function.js" --delete
+
+      - name: Fix apple-app-site-association content-type
+        # Apple requires application/json. S3 defaults to application/octet-stream
+        # for extension-less files. Re-upload with explicit metadata.
+        run: |
+          aws s3 cp .well-known/apple-app-site-association \
+            s3://dadaring-web-prod/.well-known/apple-app-site-association \
+            --content-type "application/json" \
+            --metadata-directive REPLACE
 
       - name: Invalidate CloudFront cache
         env:
