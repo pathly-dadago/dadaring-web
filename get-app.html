@@ -11,15 +11,37 @@
       var ua = navigator.userAgent || '';
       var isIOS = /iphone|ipad|ipod/i.test(ua);
       var isAndroid = /android/i.test(ua);
-      var playUrl = 'https://play.google.com/store/apps/details?id=com.dadaring.app';
-      var appleUrl = 'https://apps.apple.com/app/id6769691549';
+      var playPkg = 'com.dadaring.app';
+      var appStoreId = '6769691549';
+
+      // Extract invite code from query (?code=ABC123) or URL hash for deferred deep linking
+      var code = null;
+      var params = new URLSearchParams(window.location.search);
+      if (params.has('code')) code = params.get('code');
+      if (!code && window.location.hash) {
+        var hashMatch = window.location.hash.match(/^#?([A-Z0-9]{8})$/i);
+        if (hashMatch) code = hashMatch[1];
+      }
+
+      // Build URLs (Android Play Store accepts an install referrer query that
+      // is delivered to the app via the Play Install Referrer API after install)
+      var playUrl = 'https://play.google.com/store/apps/details?id=' + playPkg;
+      if (code) {
+        playUrl += '&referrer=' + encodeURIComponent('invite_code=' + code);
+      }
+      var appleUrl = 'https://apps.apple.com/app/id' + appStoreId;
+
+      // iOS fallback: clipboard copy (deferred deep linking via pasteboard inspection on first launch).
+      if (isIOS && code && navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText('dadaring-invite:' + code).catch(function () { /* ignore */ });
+      }
 
       if (isIOS) {
         window.location.replace(appleUrl);
       } else if (isAndroid) {
         window.location.replace(playUrl);
       }
-      // Desktop & 기타: 페이지 내용 그대로 노출 (양쪽 스토어 버튼 보여줌)
+      // Desktop: 페이지 내용 그대로 노출 (양쪽 스토어 버튼 보여줌)
     })();
   </script>
 </head>
