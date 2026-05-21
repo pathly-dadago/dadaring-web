@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["C3F6AMF7NW.com.dadaring.app"],
+        "components": [
+          { "/": "/invite/*" },
+          { "/": "/get-app" },
+          { "/": "/get-app.html" }
+        ]
+      }
+    ]
+  }
+}
