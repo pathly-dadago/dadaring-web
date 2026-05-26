@@ -15,7 +15,7 @@
   --divider: #D8F0E3;
   --bronze: #D97706;
   --error: #EF4444;
-  --font-kr: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-kr: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -363,6 +363,85 @@ a:hover { text-decoration: underline; }
   margin-bottom: 12px;
 }
 .legal ul { padding-left: 20px; }
+
+/* ── Invite page ── */
+.invite-hero {
+  padding: 120px 24px 64px;
+  min-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.invite-emoji {
+  font-size: 64px;
+  line-height: 1;
+  margin-bottom: 20px;
+}
+.invite-title {
+  font-size: clamp(26px, 5vw, 34px);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 12px;
+}
+.invite-subtitle {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin: 0 0 32px;
+}
+.invite-kakao-hint {
+  display: block;
+  max-width: 420px;
+  margin: 0 auto 28px;
+  padding: 14px 18px;
+  background: var(--primary-surface);
+  border: 1px solid var(--divider);
+  border-radius: 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.6;
+  text-align: left;
+}
+.invite-kakao-hint strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--primary-dark);
+  font-size: 13px;
+}
+.invite-cta-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+}
+.invite-cta-primary {
+  justify-content: center;
+  padding: 16px 24px;
+  font-size: 17px;
+  width: 100%;
+}
+.invite-cta-row {
+  display: flex;
+  gap: 12px;
+}
+.invite-cta-store {
+  flex: 1;
+  justify-content: center;
+  padding: 12px 16px;
+  background: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: none;
+}
+.invite-cta-store:hover { background: #000; }
+.invite-cta-note {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin: 4px 0 0;
+}
 
 /* ── Responsive ── */
 @media (max-width: 640px) {
