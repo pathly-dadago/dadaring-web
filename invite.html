@@ -6,54 +6,6 @@
   <title>일정 공유 초대 - DADAring</title>
   <link rel="stylesheet" href="css/style.css">
   <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
-  <script>
-    // Path parsing happens before render so we can rebuild store URLs with
-    // the invite code attached as install referrer (Android) / clipboard (iOS).
-    (function () {
-      var path = window.location.pathname;
-      var match = path.match(/\/invite\/([A-Za-z0-9]+)/);
-      if (!match) return;  // not an /invite/<code> URL — leave page alone
-
-      var code = match[1].toUpperCase();
-      var ua = navigator.userAgent || '';
-      var isIOS = /iphone|ipad|ipod/i.test(ua);
-      var isAndroid = /android/i.test(ua);
-      // KakaoTalk's in-app WebView swallows the OS App-Links intent dispatch,
-      // so the user lands here even with the app installed. Detect it so we
-      // can show a "open in external browser" hint.
-      var isKakao = /KAKAOTALK/i.test(ua);
-      var playPkg = 'com.dadaring.app';
-      var appStoreId = '6769691549';
-
-      // Android: append referrer so Play Install Referrer API delivers the code to the app
-      var playUrl = 'https://play.google.com/store/apps/details?id=' + playPkg
-                  + '&referrer=' + encodeURIComponent('invite_code=' + code);
-      var appleUrl = 'https://apps.apple.com/app/id' + appStoreId;
-      // Android intent URL forces a system-level scheme dispatch and falls back
-      // to Play Store automatically if the app isn't installed.
-      var androidIntentUrl = 'intent://invite/' + code
-                           + '#Intent;scheme=dadaring;package=' + playPkg
-                           + ';S.browser_fallback_url=' + encodeURIComponent(playUrl)
-                           + ';end';
-      var iosSchemeUrl = 'dadaring://invite/' + code;
-      var deepLinkUrl = isAndroid ? androidIntentUrl : iosSchemeUrl;
-
-      // iOS: copy code to clipboard as fallback (read by app on first launch via DeferredInviteService)
-      if (isIOS && navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText('dadaring-invite:' + code).catch(function () { /* ignore */ });
-      }
-
-      window.__dadaring = {
-        code: code,
-        playUrl: playUrl,
-        appleUrl: appleUrl,
-        deepLinkUrl: deepLinkUrl,
-        isIOS: isIOS,
-        isAndroid: isAndroid,
-        isKakao: isKakao,
-      };
-    })();
-  </script>
 </head>
 <body>
 
@@ -99,41 +51,73 @@
 </footer>
 
 <script>
-  // Wire rendered links with code-aware URLs, surface the Kakao hint, and
-  // attempt to launch the installed app immediately. The store fallback only
-  // fires if the page is still visible after a few seconds (i.e., no app
-  // intercepted the scheme).
   (function () {
-    var d = window.__dadaring;
-    if (!d) return;
+    var APP_SCHEME = 'dadaring';
+    var ANDROID_PKG = 'com.dadaring.app';
+    var APP_STORE_ID = '6769691549';
+    var STORE_FALLBACK_MS = 4000;
 
-    document.getElementById('open-app-link').href = d.deepLinkUrl;
-    document.getElementById('play-store-link').href = d.playUrl;
-    document.getElementById('app-store-link').href = d.appleUrl;
+    var match = window.location.pathname.match(/\/invite\/([A-Za-z0-9]+)/);
+    if (!match) return;
+    var code = match[1].toUpperCase();
 
-    if (d.isKakao) {
+    var ua = navigator.userAgent || '';
+    var isIOS = /iphone|ipad|ipod/i.test(ua);
+    var isAndroid = /android/i.test(ua);
+    // KakaoTalk's in-app WebView swallows OS App-Links dispatch, so users land
+    // here even with the app installed; show a hint pointing to the "open in
+    // external browser" menu.
+    var isKakao = /KAKAOTALK/i.test(ua);
+
+    var playUrl = 'https://play.google.com/store/apps/details?id=' + ANDROID_PKG
+                + '&referrer=' + encodeURIComponent('invite_code=' + code);
+    var appleUrl = 'https://apps.apple.com/app/id' + APP_STORE_ID;
+    // Android intent URL forces system-level scheme dispatch and auto-falls
+    // back to Play Store if the app isn't installed.
+    var androidIntentUrl = 'intent://invite/' + code
+                         + '#Intent;scheme=' + APP_SCHEME + ';package=' + ANDROID_PKG
+                         + ';S.browser_fallback_url=' + encodeURIComponent(playUrl)
+                         + ';end';
+    var iosSchemeUrl = APP_SCHEME + '://invite/' + code;
+    var deepLinkUrl = isAndroid ? androidIntentUrl : iosSchemeUrl;
+
+    // DeferredInviteService reads this clipboard sentinel on first launch.
+    if (isIOS && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText('dadaring-invite:' + code).catch(function () { /* ignore */ });
+    }
+
+    document.getElementById('open-app-link').href = deepLinkUrl;
+    document.getElementById('play-store-link').href = playUrl;
+    document.getElementById('app-store-link').href = appleUrl;
+
+    if (isKakao) {
       var hint = document.getElementById('kakao-hint');
       if (hint) hint.hidden = false;
     }
 
-    if (!d.isIOS && !d.isAndroid) return;
+    if (!isIOS && !isAndroid) return;
 
-    // Best-effort auto-launch. On Android the intent URL has a
-    // browser_fallback_url so users without the app land on Play Store; on
-    // iOS the hidden iframe avoids leaving an error page if no handler exists.
-    if (d.isAndroid) {
-      window.location.href = d.deepLinkUrl;
-    } else {
-      var iframe = document.createElement('iframe');
-      iframe.style.display = 'none';
-      iframe.src = d.deepLinkUrl;
-      document.body.appendChild(iframe);
-    }
-
+    // Defer the auto-launch one tick so the UI paints before the browser
+    // hands off to the scheme handler (avoids a blank-page flash).
     setTimeout(function () {
-      if (document.hidden) return;
-      window.location.replace(d.isIOS ? d.appleUrl : d.playUrl);
-    }, 4000);
+      if (isAndroid) {
+        window.location.href = deepLinkUrl;
+      } else {
+        // Hidden iframe avoids navigating the top frame to an error page if
+        // no app handles dadaring://.
+        var iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = deepLinkUrl;
+        document.body.appendChild(iframe);
+      }
+
+      setTimeout(function () {
+        // If the page is hidden the app probably took over — don't yank
+        // users back to the store on return.
+        if (document.hidden) return;
+        window.location.replace(isIOS ? appleUrl : playUrl);
+      }, STORE_FALLBACK_MS);
+    }, 0);
   })();
 </script>
 
