@@ -6,44 +6,6 @@
   <title>일정 공유 초대 - DADAring</title>
   <link rel="stylesheet" href="css/style.css">
   <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
-  <script>
-    // Path parsing happens before render so we can rebuild store URLs with
-    // the invite code attached as install referrer (Android) / clipboard (iOS).
-    (function () {
-      var path = window.location.pathname;
-      var match = path.match(/\/invite\/([A-Za-z0-9]+)/);
-      if (!match) return;  // not an /invite/<code> URL — leave page alone
-
-      var code = match[1].toUpperCase();
-      var ua = navigator.userAgent || '';
-      var isIOS = /iphone|ipad|ipod/i.test(ua);
-      var isAndroid = /android/i.test(ua);
-      var playPkg = 'com.dadaring.app';
-      var appStoreId = '6769691549';
-
-      // Android: append referrer so Play Install Referrer API delivers the code to the app
-      var playUrl = 'https://play.google.com/store/apps/details?id=' + playPkg
-                  + '&referrer=' + encodeURIComponent('invite_code=' + code);
-      var appleUrl = 'https://apps.apple.com/app/id' + appStoreId;
-
-      // iOS: copy code to clipboard as fallback (read by app on first launch via DeferredInviteService)
-      if (isIOS && navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText('dadaring-invite:' + code).catch(function () { /* ignore */ });
-      }
-
-      // Expose handles for the rendered buttons below
-      window.__dadaring = { code: code, playUrl: playUrl, appleUrl: appleUrl };
-
-      // Note: this page is reached ONLY when the app is not installed (Universal Link /
-      // App Link would intercept first if installed). Auto-redirect after a tiny delay
-      // gives users a chance to read the headline. If they go back, they see the page.
-      if (isIOS || isAndroid) {
-        setTimeout(function () {
-          window.location.replace(isIOS ? appleUrl : playUrl);
-        }, 1500);
-      }
-    })();
-  </script>
 </head>
 <body>
 
@@ -53,27 +15,32 @@
   </div>
 </nav>
 
-<section class="hero" style="padding-top: 120px;">
-  <div style="font-size: 48px; margin-bottom: 16px;">🤝</div>
-  <h1 style="font-size: 28px;">일정 공유 초대</h1>
-  <p class="subtitle">
-    다다링 앱에서 아이의 일정을 확인할 수 있습니다.<br>
-    앱을 설치하면 초대가 자동으로 적용됩니다.
+<section class="hero invite-hero">
+  <div class="invite-emoji">🤝</div>
+  <h1 class="invite-title">일정 공유 초대</h1>
+  <p class="invite-subtitle">
+    다다링 앱에서 아이의 일정을 확인할 수 있습니다.
   </p>
 
-  <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 32px;">
-    <a id="play-store-link" href="https://play.google.com/store/apps/details?id=com.dadaring.app" class="hero-cta" style="background: #000; text-decoration: none;">
-      🤖 Google Play
-    </a>
-    <a id="app-store-link" href="https://apps.apple.com/app/id6769691549" class="hero-cta" style="background: #000; text-decoration: none;">
-      🍎 App Store
-    </a>
+  <div id="kakao-hint" class="invite-kakao-hint" hidden>
+    <strong>카카오톡에서 열린 경우</strong>
+    <span>아래 <b>‘앱에서 열기’</b> 버튼이 동작하지 않으면<br>
+      우측 상단 <b>⋮</b> → <b>‘다른 브라우저로 열기’</b>를 눌러주세요.</span>
   </div>
 
-  <div style="margin-top: 24px;">
-    <a id="open-app-link" href="#" class="hero-cta" style="background: var(--primary); text-decoration: none;">
+  <div class="invite-cta-stack">
+    <a id="open-app-link" href="#" class="hero-cta invite-cta-primary">
       앱에서 열기
     </a>
+    <div class="invite-cta-row">
+      <a id="play-store-link" href="https://play.google.com/store/apps/details?id=com.dadaring.app" class="hero-cta invite-cta-store">
+        Google Play
+      </a>
+      <a id="app-store-link" href="https://apps.apple.com/app/id6769691549" class="hero-cta invite-cta-store">
+        App Store
+      </a>
+    </div>
+    <p class="invite-cta-note">앱이 설치되어 있지 않으면 스토어로 이동합니다.</p>
   </div>
 </section>
 
@@ -84,13 +51,74 @@
 </footer>
 
 <script>
-  // Wire up rendered links with code-aware URLs from the IIFE above.
-  if (window.__dadaring) {
-    var d = window.__dadaring;
-    document.getElementById('open-app-link').href = 'dadaring://invite/' + d.code;
-    document.getElementById('play-store-link').href = d.playUrl;
-    document.getElementById('app-store-link').href = d.appleUrl;
-  }
+  (function () {
+    var APP_SCHEME = 'dadaring';
+    var ANDROID_PKG = 'com.dadaring.app';
+    var APP_STORE_ID = '6769691549';
+    var STORE_FALLBACK_MS = 4000;
+
+    var match = window.location.pathname.match(/\/invite\/([A-Za-z0-9]+)/);
+    if (!match) return;
+    var code = match[1].toUpperCase();
+
+    var ua = navigator.userAgent || '';
+    var isIOS = /iphone|ipad|ipod/i.test(ua);
+    var isAndroid = /android/i.test(ua);
+    // KakaoTalk's in-app WebView swallows OS App-Links dispatch, so users land
+    // here even with the app installed; show a hint pointing to the "open in
+    // external browser" menu.
+    var isKakao = /KAKAOTALK/i.test(ua);
+
+    var playUrl = 'https://play.google.com/store/apps/details?id=' + ANDROID_PKG
+                + '&referrer=' + encodeURIComponent('invite_code=' + code);
+    var appleUrl = 'https://apps.apple.com/app/id' + APP_STORE_ID;
+    // Android intent URL forces system-level scheme dispatch and auto-falls
+    // back to Play Store if the app isn't installed.
+    var androidIntentUrl = 'intent://invite/' + code
+                         + '#Intent;scheme=' + APP_SCHEME + ';package=' + ANDROID_PKG
+                         + ';S.browser_fallback_url=' + encodeURIComponent(playUrl)
+                         + ';end';
+    var iosSchemeUrl = APP_SCHEME + '://invite/' + code;
+    var deepLinkUrl = isAndroid ? androidIntentUrl : iosSchemeUrl;
+
+    // DeferredInviteService reads this clipboard sentinel on first launch.
+    if (isIOS && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText('dadaring-invite:' + code).catch(function () { /* ignore */ });
+    }
+
+    document.getElementById('open-app-link').href = deepLinkUrl;
+    document.getElementById('play-store-link').href = playUrl;
+    document.getElementById('app-store-link').href = appleUrl;
+
+    if (isKakao) {
+      var hint = document.getElementById('kakao-hint');
+      if (hint) hint.hidden = false;
+    }
+
+    if (!isIOS && !isAndroid) return;
+
+    // Defer the auto-launch one tick so the UI paints before the browser
+    // hands off to the scheme handler (avoids a blank-page flash).
+    setTimeout(function () {
+      if (isAndroid) {
+        window.location.href = deepLinkUrl;
+      } else {
+        // Hidden iframe avoids navigating the top frame to an error page if
+        // no app handles dadaring://.
+        var iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = deepLinkUrl;
+        document.body.appendChild(iframe);
+      }
+
+      setTimeout(function () {
+        // If the page is hidden the app probably took over — don't yank
+        // users back to the store on return.
+        if (document.hidden) return;
+        window.location.replace(isIOS ? appleUrl : playUrl);
+      }, STORE_FALLBACK_MS);
+    }, 0);
+  })();
 </script>
 
 </body>
