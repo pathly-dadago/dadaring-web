@@ -118,6 +118,17 @@ a:hover { text-decoration: underline; }
   text-decoration: none;
 }
 
+.store-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.store-button {
+  background: #000;
+}
+.store-button:hover { background: #1a1a1a; }
+
 /* ── Features ── */
 .features {
   max-width: 1080px;
