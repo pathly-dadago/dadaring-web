@@ -177,6 +177,90 @@ a:hover { text-decoration: underline; }
   color: var(--text-secondary);
   line-height: 1.6;
 }
+.feature-card-hl {
+  border-color: var(--primary);
+  background: linear-gradient(180deg, var(--primary-surface) 0%, var(--card) 60%);
+}
+.badge-new {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 6px;
+  padding: 2px 8px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
+/* ── Screenshots showcase ── */
+.shots {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 72px 0 80px;
+}
+.shots h2 {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  padding: 0 24px;
+}
+.shots .section-sub {
+  text-align: center;
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+  font-size: 15px;
+  padding: 0 24px;
+}
+.shots-scroll {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 24px 28px;
+  scrollbar-width: none;
+}
+.shots-scroll::-webkit-scrollbar { display: none; }
+.shot {
+  flex: 0 0 auto;
+  width: 232px;
+  scroll-snap-align: center;
+  text-align: center;
+}
+.shot img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 22px;
+  border: 1px solid var(--divider);
+  box-shadow: 0 10px 30px rgba(31, 51, 41, 0.10);
+}
+.shot-hl img {
+  border-color: var(--primary);
+  box-shadow: 0 14px 36px rgba(67, 198, 122, 0.28);
+}
+.shot figcaption {
+  margin-top: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.cap-new {
+  margin-left: 4px;
+  padding: 1px 7px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  vertical-align: middle;
+}
+@media (max-width: 640px) {
+  .shot { width: 200px; }
+}
 
 /* ── Use Cases ── */
 .usecases {
