@@ -548,6 +548,7 @@ a:hover { text-decoration: underline; }
 
 /* ── Feedback modal ── */
 .nav-feedback { background: var(--primary, #43C67A); color: #fff !important; padding: 6px 14px; border-radius: 8px; font-weight: 600; }
+.fb-overlay[hidden] { display: none; }
 .fb-overlay { position: fixed; inset: 0; background: rgba(31, 51, 41, .45); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
 .fb-modal { position: relative; background: #fff; border-radius: 16px; padding: 28px 24px 22px; width: 100%; max-width: 420px; box-shadow: 0 12px 40px rgba(31, 51, 41, .2); }
 .fb-modal h3 { margin: 0 0 6px; font-size: 20px; color: #1F3329; }
