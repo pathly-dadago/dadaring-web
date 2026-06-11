@@ -32,7 +32,7 @@ cat > /tmp/response-headers-policy.json <<'EOF'
     },
     "ContentSecurityPolicy": {
       "Override": true,
-      "ContentSecurityPolicy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src 'self' https://cdn.jsdelivr.net data:; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+      "ContentSecurityPolicy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src 'self' https://cdn.jsdelivr.net data:; img-src 'self' data:; connect-src 'self' https://vk5y4us4uxvs6lebtogalyloua0ttbte.lambda-url.ap-northeast-2.on.aws; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
     }
   }
 }
