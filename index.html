@@ -24,6 +24,7 @@
       <a href="#features">기능</a>
       <a href="#about">소개</a>
       <a href="#download">다운로드</a>
+      <a href="#" class="nav-feedback" id="feedback-open">피드백</a>
     </div>
   </div>
 </nav>
@@ -117,8 +118,8 @@
     </div>
     <div class="feature-card">
       <div class="feature-icon">👨‍👩‍👧‍👦</div>
-      <h3>보호자 일정 공유</h3>
-      <p>배우자, 조부모, 돌봄 선생님에게 아이 일정을 공유. 각자의 앱에서 동일한 일정을 확인할 수 있어요.</p>
+      <h3>가족·아이와 공유</h3>
+      <p>배우자, 조부모는 물론 아이 계정과도 연결. 아이가 직접 자기 숙제를 체크하고 일정을 확인해요.</p>
     </div>
     <div class="feature-card">
       <div class="feature-icon">🏫</div>
@@ -158,6 +159,11 @@
         <div class="usecase-emoji">👶👶</div>
         <h3>다자녀 가정</h3>
         <p>"아이마다 학원이 다르고 준비물도 다르고... 둘째 준비물을 자꾸 까먹어요."</p>
+      </div>
+      <div class="usecase-card">
+        <div class="usecase-emoji">🎒</div>
+        <h3>스스로 챙기는 학생</h3>
+        <p>"엄마가 공유해준 일정이랑 숙제를 제 폰에서 직접 체크해요. 위젯으로 오늘 할 일도 바로 보여요."</p>
       </div>
     </div>
   </div>
@@ -257,5 +263,52 @@
   </div>
 </footer>
 
+
+<!-- Feedback Modal -->
+<div class="fb-overlay" id="feedback-overlay" hidden>
+  <div class="fb-modal" role="dialog" aria-modal="true" aria-labelledby="fb-title">
+    <button class="fb-close" id="feedback-close" aria-label="닫기">&times;</button>
+    <h3 id="fb-title">피드백 보내기</h3>
+    <p class="fb-sub">다다링에 바라는 점, 불편한 점을 자유롭게 적어주세요.</p>
+    <textarea id="fb-message" maxlength="2000" rows="6" placeholder="내용을 입력해주세요"></textarea>
+    <input id="fb-email" type="text" maxlength="200" placeholder="답변 받을 연락처 (선택)">
+    <input id="fb-website" type="text" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
+    <button class="fb-submit" id="feedback-submit">보내기</button>
+    <p class="fb-status" id="fb-status"></p>
+  </div>
+</div>
+<script>
+(function () {
+  var FEEDBACK_URL = "https://vk5y4us4uxvs6lebtogalyloua0ttbte.lambda-url.ap-northeast-2.on.aws/";
+  var overlay = document.getElementById("feedback-overlay");
+  var status = document.getElementById("fb-status");
+  var msg = document.getElementById("fb-message");
+  function show() { overlay.hidden = false; status.textContent = ""; msg.focus(); }
+  function hide() { overlay.hidden = true; }
+  document.getElementById("feedback-open").addEventListener("click", function (e) { e.preventDefault(); show(); });
+  document.getElementById("feedback-close").addEventListener("click", hide);
+  overlay.addEventListener("click", function (e) { if (e.target === overlay) hide(); });
+  document.getElementById("feedback-submit").addEventListener("click", function () {
+    var text = msg.value.trim();
+    if (!text) { status.textContent = "내용을 입력해주세요."; return; }
+    var btn = this; btn.disabled = true; status.textContent = "보내는 중...";
+    fetch(FEEDBACK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: text,
+        email: document.getElementById("fb-email").value.trim(),
+        website: document.getElementById("fb-website").value
+      })
+    }).then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+      .then(function () {
+        status.textContent = "보내주셔서 감사해요! 소중히 읽을게요 💚";
+        msg.value = ""; document.getElementById("fb-email").value = "";
+        setTimeout(hide, 1800); btn.disabled = false;
+      })
+      .catch(function () { status.textContent = "전송에 실패했어요. 잠시 후 다시 시도해주세요."; btn.disabled = false; });
+  });
+})();
+</script>
 </body>
 </html>
