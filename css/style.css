@@ -545,3 +545,22 @@ a:hover { text-decoration: underline; }
   .stats-inner { flex-direction: column; }
   .footer-inner { flex-direction: column; }
 }
+
+/* ── Feedback modal ── */
+.nav-feedback { background: var(--primary, #43C67A); color: #fff !important; padding: 6px 14px; border-radius: 8px; font-weight: 600; }
+.fb-overlay { position: fixed; inset: 0; background: rgba(31, 51, 41, .45); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+.fb-modal { position: relative; background: #fff; border-radius: 16px; padding: 28px 24px 22px; width: 100%; max-width: 420px; box-shadow: 0 12px 40px rgba(31, 51, 41, .2); }
+.fb-modal h3 { margin: 0 0 6px; font-size: 20px; color: #1F3329; }
+.fb-sub { margin: 0 0 14px; font-size: 14px; color: #5E7468; }
+.fb-modal textarea, .fb-modal input[type="text"] { width: 100%; box-sizing: border-box; border: 1px solid #D8E5DD; border-radius: 10px; padding: 10px 12px; font: inherit; font-size: 14px; margin-bottom: 10px; }
+.fb-modal textarea { resize: vertical; }
+.fb-submit { width: 100%; background: #35A866; color: #fff; border: 0; border-radius: 10px; padding: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
+.fb-submit:disabled { opacity: .6; }
+.fb-close { position: absolute; top: 10px; right: 14px; background: none; border: 0; font-size: 22px; color: #8FA39A; cursor: pointer; }
+.fb-status { min-height: 18px; margin: 10px 0 0; font-size: 13px; color: #35A866; text-align: center; }
+
+/* 모바일에서도 피드백 버튼은 유지 (다른 nav 링크만 숨김) */
+@media (max-width: 640px) {
+  .nav-links { display: flex; }
+  .nav-links a:not(.nav-feedback) { display: none; }
+}
