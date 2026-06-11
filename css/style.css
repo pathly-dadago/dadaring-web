@@ -558,3 +558,9 @@ a:hover { text-decoration: underline; }
 .fb-submit:disabled { opacity: .6; }
 .fb-close { position: absolute; top: 10px; right: 14px; background: none; border: 0; font-size: 22px; color: #8FA39A; cursor: pointer; }
 .fb-status { min-height: 18px; margin: 10px 0 0; font-size: 13px; color: #35A866; text-align: center; }
+
+/* 모바일에서도 피드백 버튼은 유지 (다른 nav 링크만 숨김) */
+@media (max-width: 640px) {
+  .nav-links { display: flex; }
+  .nav-links a:not(.nav-feedback) { display: none; }
+}
