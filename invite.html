@@ -93,6 +93,12 @@
     if (isKakao) {
       var hint = document.getElementById('kakao-hint');
       if (hint) hint.hidden = false;
+      // 카카오톡 인앱 웹뷰는 intent:// 내비게이션을 차단하고 에러 화면을 띄운다.
+      // openExternal 로 시스템 브라우저로 강제 전환 → 거기서 정상 딥링크 발사.
+      // (전환 실패 시 위 힌트(외부 브라우저 열기 안내)가 폴백.)
+      window.location.href = 'kakaotalk://web/openExternal?url='
+        + encodeURIComponent(window.location.href);
+      return;
     }
 
     if (!isIOS && !isAndroid) return;
