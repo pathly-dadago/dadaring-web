@@ -2,6 +2,8 @@
 
 `dadaring.com` 응답에 HSTS, X-Content-Type-Options, Referrer-Policy, X-Frame-Options, CSP 5종을 강제 주입.
 
+> 2026-07-07: 관리자 페이지(admin.html)용으로 connect-src 에 cognito-idp + API GW(prod/dev) 추가.
+
 - **Policy 이름:** `dadaring-web-security-headers`
 - **Policy ID:** `edc7b320-d4fe-4530-875a-4f878e84282f`
 - **Prod Distribution ID:** `E1LHYXQO70K3I1`
@@ -32,7 +34,7 @@ cat > /tmp/response-headers-policy.json <<'EOF'
     },
     "ContentSecurityPolicy": {
       "Override": true,
-      "ContentSecurityPolicy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src 'self' https://cdn.jsdelivr.net data:; img-src 'self' data:; connect-src 'self' https://vk5y4us4uxvs6lebtogalyloua0ttbte.lambda-url.ap-northeast-2.on.aws; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+      "ContentSecurityPolicy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src 'self' https://cdn.jsdelivr.net data:; img-src 'self' data:; connect-src 'self' https://vk5y4us4uxvs6lebtogalyloua0ttbte.lambda-url.ap-northeast-2.on.aws https://cognito-idp.ap-northeast-2.amazonaws.com https://dnbl3bo4eg.execute-api.ap-northeast-2.amazonaws.com https://c5gye4ook6.execute-api.ap-northeast-2.amazonaws.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
     }
   }
 }
