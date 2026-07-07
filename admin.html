@@ -101,9 +101,13 @@
         text-align:right;font-size:11px;}
       .side-foot span{display:none;} /* 좁은 화면 — 이메일 생략, 로그아웃만 */
       .content{flex-direction:column;}
-      .list{width:100%;height:auto;max-height:45vh;border-right:0;
-        border-bottom:1px solid var(--divider);padding:12px;}
-      .detail{height:auto;padding:12px;overflow:visible;}
+      .list{width:100%;height:auto;max-height:none;overflow:visible;border-right:0;
+        border-bottom:0;padding:12px;}
+      .detail{display:none;} /* 모바일은 리스트 안 인라인(아코디언)으로 */
+      .fb-inline{margin:-2px 0 10px;}
+      .fb-inline .dcard{border-top-left-radius:0;border-top-right-radius:0;
+        border-top:0;max-width:none;}
+      .fb.sel{border-bottom-left-radius:0;border-bottom-right-radius:0;}
       .dcard{padding:14px;}
       /* 통계 */
       .scard{padding:12px;}
@@ -245,6 +249,20 @@ const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>
   .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 const fmt = iso => iso ? iso.slice(0, 16).replace('T', ' ') : '';
 
+const isMobile = () => matchMedia('(max-width:768px)').matches;
+
+function detailHtml(f) {
+  return `
+    <div class="dcard">
+      <div class="dmeta">${esc(f.ownerEmail)}${f.client ? ' · ' + esc(f.client) : ''} · ${fmt(f.createdAt)}</div>
+      <div class="dmsg">${esc(f.message)}</div>
+      <div class="rep-h">💬 답글 이력 (${f.replies.length})</div>
+      ${f.replies.map(r => `<div class="rep">${esc(r.message)}<span class="rdt">${fmt(r.createdAt)}</span></div>`).join('')}
+      <textarea id="replyText" rows="4" placeholder="답글을 입력하면 사용자 앱 알림으로 전송돼요"></textarea>
+      <button class="send" id="sendBtn" onclick="sendReply('${f.feedbackId}')">답글 저장 + 앱 알림 보내기</button>
+    </div>`;
+}
+
 function renderList() {
   const box = document.getElementById('items');
   const shown = feedbacks.filter(f => filter === 'all' || f.status === filter);
@@ -257,23 +275,20 @@ function renderList() {
         <span class="dt">${fmt(f.createdAt)}</span>
       </div>
       <div class="msg">${esc(f.message)}</div>
-    </div>`).join('');
+    </div>
+    ${isMobile() && f.feedbackId === selectedId
+        ? `<div class="fb-inline">${detailHtml(f)}</div>` : ''}`).join('');
 }
 
 function select(id) {
-  selectedId = id;
+  // 모바일 아코디언 — 같은 항목 다시 누르면 접힘
+  selectedId = (isMobile() && selectedId === id) ? null : id;
   renderList();
-  const f = feedbacks.find(x => x.feedbackId === id);
-  if (!f) return;
-  document.getElementById('detail').innerHTML = `
-    <div class="dcard">
-      <div class="dmeta">${esc(f.ownerEmail)}${f.client ? ' · ' + esc(f.client) : ''} · ${fmt(f.createdAt)}</div>
-      <div class="dmsg">${esc(f.message)}</div>
-      <div class="rep-h">💬 답글 이력 (${f.replies.length})</div>
-      ${f.replies.map(r => `<div class="rep">${esc(r.message)}<span class="rdt">${fmt(r.createdAt)}</span></div>`).join('')}
-      <textarea id="replyText" rows="4" placeholder="답글을 입력하면 사용자 앱 알림으로 전송돼요"></textarea>
-      <button class="send" id="sendBtn" onclick="sendReply('${f.feedbackId}')">답글 저장 + 앱 알림 보내기</button>
-    </div>`;
+  const f = feedbacks.find(x => x.feedbackId === selectedId);
+  if (isMobile()) return; // 모바일은 renderList 가 인라인으로 그림
+  document.getElementById('detail').innerHTML = f
+      ? detailHtml(f)
+      : '<div class="empty">왼쪽에서 피드백을 선택하세요</div>';
 }
 
 async function sendReply(id) {
