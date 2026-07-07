@@ -125,7 +125,7 @@ async function doLogin(e) {
     }
     sessionStorage.setItem('adminIdToken', data.AuthenticationResult.IdToken);
     sessionStorage.setItem('adminEmail', document.getElementById('email').value.trim());
-    enter();
+    await enter();
   } catch (_) { err.textContent = '네트워크 오류 — 잠시 후 다시 시도해 주세요'; }
   return false;
 }
@@ -135,13 +135,9 @@ function logout() { sessionStorage.clear(); location.reload(); }
 async function api(path, opts = {}) {
   const res = await fetch(API + path, { ...opts,
     headers: { 'Content-Type': 'application/json',
-               'Authorization': 'Bearer ' + token(), ...(opts.headers || {}) } });
-  if (res.status === 401) { logout(); throw new Error('세션 만료'); }
-  if (res.status === 403) {
-    document.getElementById('items').innerHTML = '<div class="empty">이 계정은 관리자 권한이 없어요</div>';
-    throw new Error('권한 없음');
-  }
-  if (!res.ok) throw new Error('요청 실패 ' + res.status);
+               // 앱과 동일하게 raw 토큰 — API GW Cognito authorizer 는 Bearer 접두어를 못 읽는다
+               'Authorization': token(), ...(opts.headers || {}) } });
+  if (!res.ok) { const e = new Error('요청 실패 ' + res.status); e.status = res.status; throw e; }
   return res.json();
 }
 
@@ -151,6 +147,23 @@ async function load() {
   renderList();
   const n = feedbacks.filter(f => f.status === 'new').length;
   document.getElementById('newCnt').textContent = n || '';
+}
+
+/// 로그인/재방문 시 관리자 검사 겸 첫 로드 — 통과해야만 셸을 보여준다.
+async function verifyAndLoad() {
+  try {
+    await load();
+    return true;
+  } catch (e) {
+    sessionStorage.clear();
+    const err = document.getElementById('loginErr');
+    err.textContent = e.status === 403 ? '관리자 계정이 아니에요'
+        : e.status === 401 ? '세션이 만료됐어요. 다시 로그인해 주세요'
+        : '목록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요';
+    document.getElementById('shell').classList.add('hidden');
+    document.getElementById('login').classList.remove('hidden');
+    return false;
+  }
 }
 
 function setFilter(f) {
@@ -212,15 +225,16 @@ async function sendReply(id) {
       feedbacks.filter(f => f.status === 'new').length || '';
   } catch (e) {
     btn.disabled = false; btn.textContent = '답글 저장 + 앱 알림 보내기';
+    if (e.status === 401) { alert('세션이 만료됐어요. 다시 로그인해 주세요'); logout(); return; }
     alert('전송에 실패했어요: ' + e.message);
   }
 }
 
-function enter() {
+async function enter() {
+  if (!await verifyAndLoad()) return; // 비관리자/실패 — 로그인 화면 유지
   document.getElementById('login').classList.add('hidden');
   document.getElementById('shell').classList.remove('hidden');
   document.getElementById('who').textContent = sessionStorage.getItem('adminEmail') || '';
-  load().catch(() => {});
 }
 
 if (token()) enter();
