@@ -90,6 +90,28 @@
     .feat .fl{font-size:12.5px;margin-bottom:4px;}
     .feat .ftrack{background:var(--surface);border-radius:6px;height:10px;overflow:hidden;}
     .feat .ffill{background:var(--green);height:100%;border-radius:6px;}
+    /* ── 모바일 반응형 (≤768px): 사이드바→상단 바, 패널 세로 스택 ── */
+    @media (max-width: 768px) {
+      #shell{flex-direction:column;min-height:100vh;}
+      .side{width:100%;flex-direction:row;align-items:center;gap:8px;
+        padding:10px 12px;border-right:0;border-bottom:1px solid var(--divider);}
+      .brand{padding:0;font-size:14px;white-space:nowrap;}
+      .menu{padding:7px 10px;font-size:12.5px;white-space:nowrap;}
+      .side-foot{margin-top:0;margin-left:auto;border-top:0;padding:0;
+        text-align:right;font-size:11px;}
+      .side-foot span{display:none;} /* 좁은 화면 — 이메일 생략, 로그아웃만 */
+      .content{flex-direction:column;}
+      .list{width:100%;height:auto;max-height:45vh;border-right:0;
+        border-bottom:1px solid var(--divider);padding:12px;}
+      .detail{height:auto;padding:12px;overflow:visible;}
+      .dcard{padding:14px;}
+      /* 통계 */
+      .scard{padding:12px;}
+      .tier{display:block;overflow-x:auto;white-space:nowrap;font-size:12px;}
+      .send{width:100%;float:none;}
+      textarea{font-size:16px;} /* iOS 자동 줌 방지 */
+      .login-card{width:92vw;max-width:340px;}
+    }
   </style>
 </head>
 <body>
