@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>관리자 - DADAring</title>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+  <style>
+    :root{--green:#43C67A;--greenD:#35A866;--surface:#EAF8F0;--appbg:#F5FFF9;
+      --card:#fff;--tp:#2D3436;--ts:#8E9AAB;--divider:#D8F0E3;--red:#E85D4A;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Pretendard Variable',Pretendard,sans-serif;background:var(--appbg);color:var(--tp);}
+    button{font-family:inherit;cursor:pointer;}
+    .hidden{display:none!important;}
+    #login{min-height:100vh;display:flex;align-items:center;justify-content:center;}
+    .login-card{background:var(--card);border:1px solid var(--divider);border-radius:16px;
+      padding:32px;width:340px;box-shadow:0 8px 30px rgba(31,51,41,.08);}
+    .login-card h1{color:var(--greenD);font-size:20px;margin-bottom:20px;}
+    .login-card input{width:100%;border:1px solid var(--divider);border-radius:10px;
+      padding:11px 13px;font-size:14px;margin-bottom:10px;}
+    .login-card button{width:100%;background:var(--green);color:#fff;border:0;
+      border-radius:10px;padding:12px;font-size:15px;font-weight:700;}
+    .err{color:var(--red);font-size:12.5px;margin-top:8px;min-height:16px;}
+    #shell{display:flex;min-height:100vh;}
+    .side{width:200px;background:var(--card);border-right:1px solid var(--divider);
+      padding:20px 12px;display:flex;flex-direction:column;flex-shrink:0;}
+    .brand{font-weight:800;color:var(--greenD);font-size:16px;padding:0 8px 18px;}
+    .menu{border:0;background:var(--surface);color:var(--greenD);font-weight:700;
+      border-radius:10px;padding:10px 12px;font-size:14px;text-align:left;}
+    .menu .cnt{float:right;background:var(--red);color:#fff;border-radius:9px;
+      padding:0 7px;font-size:11px;line-height:18px;}
+    .side-foot{margin-top:auto;border-top:1px solid var(--divider);padding:12px 8px 0;font-size:12px;color:var(--ts);}
+    .side-foot button{background:none;border:0;color:var(--red);font-size:12px;padding:4px 0;}
+    .content{flex:1;display:flex;min-width:0;}
+    .list{width:360px;border-right:1px solid var(--divider);padding:16px;overflow-y:auto;
+      height:100vh;flex-shrink:0;}
+    .chips{display:flex;gap:6px;margin-bottom:12px;}
+    .chip{border:1px solid var(--divider);background:var(--card);border-radius:14px;
+      padding:4px 12px;font-size:12.5px;color:var(--ts);}
+    .chip.on{background:var(--green);border-color:var(--green);color:#fff;font-weight:700;}
+    .fb{background:var(--card);border:1px solid var(--divider);border-radius:12px;
+      padding:12px;margin-bottom:8px;cursor:pointer;}
+    .fb.sel{border:2px solid var(--green);padding:11px;}
+    .fb .top{display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px;}
+    .fb .top .st-new{color:var(--red);font-weight:800;}
+    .fb .top .st-replied{color:var(--greenD);font-weight:700;}
+    .fb .top .dt{color:var(--ts);}
+    .fb .msg{font-size:13px;color:var(--tp);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .detail{flex:1;padding:20px;overflow-y:auto;height:100vh;}
+    .dcard{background:var(--card);border:1px solid var(--divider);border-radius:14px;padding:20px;max-width:720px;}
+    .dmeta{font-size:12px;color:var(--ts);margin-bottom:12px;}
+    .dmsg{font-size:14.5px;line-height:1.65;white-space:pre-wrap;margin-bottom:18px;}
+    .rep-h{font-size:12.5px;font-weight:800;color:var(--greenD);border-top:1px dashed var(--divider);padding-top:14px;margin-bottom:8px;}
+    .rep{background:var(--surface);border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:6px;white-space:pre-wrap;}
+    .rep .rdt{display:block;font-size:11px;color:var(--ts);margin-top:4px;}
+    textarea{width:100%;border:1px solid var(--divider);border-radius:10px;padding:10px 12px;
+      font-size:13.5px;font-family:inherit;resize:vertical;margin-top:10px;}
+    .send{margin-top:8px;background:var(--green);color:#fff;border:0;border-radius:10px;
+      padding:10px 18px;font-size:13.5px;font-weight:700;float:right;}
+    .send:disabled{opacity:.5;}
+    .empty{color:var(--ts);font-size:14px;padding:60px 20px;text-align:center;}
+  </style>
+</head>
+<body>
+
+<div id="login">
+  <form class="login-card" onsubmit="return doLogin(event)">
+    <h1>DADAring 관리자</h1>
+    <input id="email" type="email" placeholder="관리자 이메일" autocomplete="username" required>
+    <input id="pw" type="password" placeholder="비밀번호" autocomplete="current-password" required>
+    <button type="submit">로그인</button>
+    <div class="err" id="loginErr"></div>
+  </form>
+</div>
+
+<div id="shell" class="hidden">
+  <nav class="side">
+    <div class="brand">DADAring 관리자</div>
+    <button class="menu">💬 피드백 <span class="cnt" id="newCnt"></span></button>
+    <div class="side-foot"><span id="who"></span><br><button onclick="logout()">로그아웃</button></div>
+  </nav>
+  <main class="content">
+    <section class="list">
+      <div class="chips">
+        <button class="chip on" data-f="all" onclick="setFilter('all')">전체</button>
+        <button class="chip" data-f="new" onclick="setFilter('new')">신규</button>
+        <button class="chip" data-f="replied" onclick="setFilter('replied')">답변완료</button>
+      </div>
+      <div id="items"></div>
+    </section>
+    <section class="detail" id="detail"><div class="empty">왼쪽에서 피드백을 선택하세요</div></section>
+  </main>
+</div>
+
+<script>
+const DEV = new URLSearchParams(location.search).get('env') === 'dev';
+const API = DEV ? 'https://c5gye4ook6.execute-api.ap-northeast-2.amazonaws.com/dev'
+               : 'https://dnbl3bo4eg.execute-api.ap-northeast-2.amazonaws.com/prod';
+const CLIENT_ID = DEV ? '29ge20drb8s709amr04u54pbv8' : '289jkoj217r2u661mfe5jf9avs';
+const COGNITO = 'https://cognito-idp.ap-northeast-2.amazonaws.com/';
+
+let feedbacks = [], filter = 'all', selectedId = null;
+
+const token = () => sessionStorage.getItem('adminIdToken');
+
+async function doLogin(e) {
+  e.preventDefault();
+  const err = document.getElementById('loginErr');
+  err.textContent = '';
+  try {
+    const res = await fetch(COGNITO, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-amz-json-1.1',
+                 'X-Amz-Target': 'AWSCognitoIdentityProviderService.InitiateAuth' },
+      body: JSON.stringify({
+        AuthFlow: 'USER_PASSWORD_AUTH', ClientId: CLIENT_ID,
+        AuthParameters: { USERNAME: document.getElementById('email').value.trim(),
+                          PASSWORD: document.getElementById('pw').value } }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.AuthenticationResult) {
+      err.textContent = '로그인에 실패했어요. 이메일/비밀번호를 확인해 주세요';
+      return false;
+    }
+    sessionStorage.setItem('adminIdToken', data.AuthenticationResult.IdToken);
+    sessionStorage.setItem('adminEmail', document.getElementById('email').value.trim());
+    enter();
+  } catch (_) { err.textContent = '네트워크 오류 — 잠시 후 다시 시도해 주세요'; }
+  return false;
+}
+
+function logout() { sessionStorage.clear(); location.reload(); }
+
+async function api(path, opts = {}) {
+  const res = await fetch(API + path, { ...opts,
+    headers: { 'Content-Type': 'application/json',
+               'Authorization': 'Bearer ' + token(), ...(opts.headers || {}) } });
+  if (res.status === 401) { logout(); throw new Error('세션 만료'); }
+  if (res.status === 403) {
+    document.getElementById('items').innerHTML = '<div class="empty">이 계정은 관리자 권한이 없어요</div>';
+    throw new Error('권한 없음');
+  }
+  if (!res.ok) throw new Error('요청 실패 ' + res.status);
+  return res.json();
+}
+
+async function load() {
+  const data = await api('/feedback/admin');
+  feedbacks = data.feedbacks || [];
+  renderList();
+  const n = feedbacks.filter(f => f.status === 'new').length;
+  document.getElementById('newCnt').textContent = n || '';
+}
+
+function setFilter(f) {
+  filter = f;
+  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c.dataset.f === f));
+  renderList();
+}
+
+// XSS 방어: 피드백 본문 등 사용자 입력은 반드시 esc() 를 거쳐 innerHTML 에 넣는다.
+// (따옴표까지 이스케이프 — 속성 컨텍스트에 실수로 들어가도 안전하게)
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const fmt = iso => iso ? iso.slice(0, 16).replace('T', ' ') : '';
+
+function renderList() {
+  const box = document.getElementById('items');
+  const shown = feedbacks.filter(f => filter === 'all' || f.status === filter);
+  if (!shown.length) { box.innerHTML = '<div class="empty">피드백이 없어요</div>'; return; }
+  box.innerHTML = shown.map(f => `
+    <div class="fb ${f.feedbackId === selectedId ? 'sel' : ''}" onclick="select('${f.feedbackId}')">
+      <div class="top">
+        <span class="${f.status === 'new' ? 'st-new' : 'st-replied'}">
+          ${f.status === 'new' ? '● 신규' : '✓ 답변완료'}</span>
+        <span class="dt">${fmt(f.createdAt)}</span>
+      </div>
+      <div class="msg">${esc(f.message)}</div>
+    </div>`).join('');
+}
+
+function select(id) {
+  selectedId = id;
+  renderList();
+  const f = feedbacks.find(x => x.feedbackId === id);
+  if (!f) return;
+  document.getElementById('detail').innerHTML = `
+    <div class="dcard">
+      <div class="dmeta">${esc(f.ownerEmail)}${f.client ? ' · ' + esc(f.client) : ''} · ${fmt(f.createdAt)}</div>
+      <div class="dmsg">${esc(f.message)}</div>
+      <div class="rep-h">💬 답글 이력 (${f.replies.length})</div>
+      ${f.replies.map(r => `<div class="rep">${esc(r.message)}<span class="rdt">${fmt(r.createdAt)}</span></div>`).join('')}
+      <textarea id="replyText" rows="4" placeholder="답글을 입력하면 사용자 앱 알림으로 전송돼요"></textarea>
+      <button class="send" id="sendBtn" onclick="sendReply('${f.feedbackId}')">답글 저장 + 앱 알림 보내기</button>
+    </div>`;
+}
+
+async function sendReply(id) {
+  const ta = document.getElementById('replyText');
+  const msg = ta.value.trim();
+  if (!msg) { ta.focus(); return; }
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true; btn.textContent = '보내는 중…';
+  try {
+    const data = await api(`/feedback/admin/${id}/reply`, {
+      method: 'POST', body: JSON.stringify({ message: msg }) });
+    const i = feedbacks.findIndex(f => f.feedbackId === id);
+    if (i >= 0) feedbacks[i] = data.feedback;
+    renderList(); select(id);
+    document.getElementById('newCnt').textContent =
+      feedbacks.filter(f => f.status === 'new').length || '';
+  } catch (e) {
+    btn.disabled = false; btn.textContent = '답글 저장 + 앱 알림 보내기';
+    alert('전송에 실패했어요: ' + e.message);
+  }
+}
+
+function enter() {
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('shell').classList.remove('hidden');
+  document.getElementById('who').textContent = sessionStorage.getItem('adminEmail') || '';
+  load().catch(() => {});
+}
+
+if (token()) enter();
+</script>
+</body>
+</html>
