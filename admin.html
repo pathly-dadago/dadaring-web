@@ -133,8 +133,8 @@
 <div id="shell" class="hidden">
   <nav class="side">
     <div class="brand">DADAring 관리자</div>
-    <button class="menu" id="menuFeedback" onclick="showView('feedback')">💬 피드백 <span class="cnt" id="newCnt"></span></button>
-    <button class="menu off" id="menuStats" onclick="showView('stats')">📊 통계</button>
+    <button class="menu" id="menuStats" onclick="showView('stats')">📊 대시보드</button>
+    <button class="menu off" id="menuFeedback" onclick="showView('feedback')">💬 피드백 <span class="cnt" id="newCnt"></span></button>
     <div class="side-foot"><span id="who"></span><br><button onclick="logout()">로그아웃</button></div>
   </nav>
   <main class="content">
@@ -585,6 +585,7 @@ async function enter() {
   document.getElementById('login').classList.add('hidden');
   document.getElementById('shell').classList.remove('hidden');
   document.getElementById('who').textContent = sessionStorage.getItem('adminEmail') || '';
+  showView('stats'); // 첫 화면 = 대시보드 (사이드바 첫 메뉴와 일치)
 }
 
 if (token()) enter();
