@@ -90,6 +90,16 @@
     .feat .fl{font-size:12.5px;margin-bottom:4px;}
     .feat .ftrack{background:var(--surface);border-radius:6px;height:10px;overflow:hidden;}
     .feat .ffill{background:var(--green);height:100%;border-radius:6px;}
+    /* 데스크톱: 가입/활성 추이를 1행 2열로 */
+    .chart-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:860px;}
+    .chart-2col .scard{max-width:none;margin-bottom:0;}
+    /* 우상단 툴바 (새로고침 · 홈페이지) */
+    .topbar{position:fixed;top:12px;right:18px;display:flex;gap:8px;z-index:50;}
+    .tb-btn{background:var(--card);border:1px solid var(--divider);border-radius:9px;
+      padding:7px 12px;font-size:13px;font-weight:700;color:var(--greenD);text-decoration:none;
+      display:inline-flex;align-items:center;box-shadow:0 2px 8px rgba(31,51,41,.06);}
+    .tb-btn:hover{border-color:var(--green);}
+    .tb-btn:disabled{opacity:.5;}
     /* ── 모바일 반응형 (≤768px): 사이드바→상단 바, 패널 세로 스택 ── */
     @media (max-width: 768px) {
       #shell{flex-direction:column;min-height:100vh;}
@@ -111,6 +121,9 @@
       .dcard{padding:14px;}
       /* 통계 */
       .scard{padding:12px;}
+      .chart-2col{grid-template-columns:1fr;gap:0;}
+      .chart-2col .scard{margin-bottom:14px;}
+      .topbar{display:none;} /* 모바일은 현재 레이아웃 유지 */
       .tier{display:block;overflow-x:auto;white-space:nowrap;font-size:12px;}
       .send{width:100%;float:none;}
       textarea{font-size:16px;} /* iOS 자동 줌 방지 */
@@ -131,6 +144,10 @@
 </div>
 
 <div id="shell" class="hidden">
+  <div class="topbar">
+    <button class="tb-btn" id="refreshBtn" onclick="refreshCurrent()">↻ 새로고침</button>
+    <a class="tb-btn" href="/">🏠 홈페이지</a>
+  </div>
   <nav class="side">
     <div class="brand">DADAring 관리자</div>
     <button class="menu" id="menuStats" onclick="showView('stats')">📊 대시보드</button>
@@ -173,7 +190,30 @@ const COGNITO = 'https://cognito-idp.ap-northeast-2.amazonaws.com/';
 
 let feedbacks = [], filter = 'all', selectedId = null;
 
-const token = () => sessionStorage.getItem('adminIdToken');
+// 세션은 localStorage(탭·새로고침에도 유지) + Cognito RefreshToken 자동 갱신으로
+// 유지한다. IdToken 이 만료(약 1h)되면 api() 가 RefreshToken 으로 조용히 재발급 →
+// 리프레시 토큰 만료(기본 30일)까지 재로그인 없이 사용.
+const token = () => localStorage.getItem('adminIdToken');
+
+// IdToken 만료 시 RefreshToken 으로 무중단 재발급. 성공 시 true.
+async function tryRefresh() {
+  const rt = localStorage.getItem('adminRefreshToken');
+  if (!rt) return false;
+  try {
+    const res = await fetch(COGNITO, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-amz-json-1.1',
+                 'X-Amz-Target': 'AWSCognitoIdentityProviderService.InitiateAuth' },
+      body: JSON.stringify({ AuthFlow: 'REFRESH_TOKEN_AUTH', ClientId: CLIENT_ID,
+                             AuthParameters: { REFRESH_TOKEN: rt } }),
+    });
+    const data = await res.json();
+    const id = data.AuthenticationResult && data.AuthenticationResult.IdToken;
+    if (!res.ok || !id) return false;
+    localStorage.setItem('adminIdToken', id);
+    return true;
+  } catch (_) { return false; }
+}
 
 async function doLogin(e) {
   e.preventDefault();
@@ -194,20 +234,27 @@ async function doLogin(e) {
       err.textContent = '로그인에 실패했어요. 이메일/비밀번호를 확인해 주세요';
       return false;
     }
-    sessionStorage.setItem('adminIdToken', data.AuthenticationResult.IdToken);
-    sessionStorage.setItem('adminEmail', document.getElementById('email').value.trim());
+    localStorage.setItem('adminIdToken', data.AuthenticationResult.IdToken);
+    if (data.AuthenticationResult.RefreshToken)
+      localStorage.setItem('adminRefreshToken', data.AuthenticationResult.RefreshToken);
+    localStorage.setItem('adminEmail', document.getElementById('email').value.trim());
     await enter();
   } catch (_) { err.textContent = '네트워크 오류 — 잠시 후 다시 시도해 주세요'; }
   return false;
 }
 
-function logout() { sessionStorage.clear(); location.reload(); }
+function logout() {
+  ['adminIdToken', 'adminRefreshToken', 'adminEmail'].forEach(k => localStorage.removeItem(k));
+  location.reload();
+}
 
-async function api(path, opts = {}) {
+async function api(path, opts = {}, _retried = false) {
   const res = await fetch(API + path, { ...opts,
     headers: { 'Content-Type': 'application/json',
                // 앱과 동일하게 raw 토큰 — API GW Cognito authorizer 는 Bearer 접두어를 못 읽는다
                'Authorization': token(), ...(opts.headers || {}) } });
+  // IdToken 만료(401) → RefreshToken 으로 재발급 후 1회 재시도.
+  if (res.status === 401 && !_retried && await tryRefresh()) return api(path, opts, true);
   if (!res.ok) { const e = new Error('요청 실패 ' + res.status); e.status = res.status; throw e; }
   return res.json();
 }
@@ -226,7 +273,7 @@ async function verifyAndLoad() {
     await load();
     return true;
   } catch (e) {
-    sessionStorage.clear();
+    ['adminIdToken', 'adminRefreshToken', 'adminEmail'].forEach(k => localStorage.removeItem(k));
     const err = document.getElementById('loginErr');
     err.textContent = e.status === 403 ? '관리자 계정이 아니에요'
         : e.status === 401 ? '세션이 만료됐어요. 다시 로그인해 주세요'
@@ -329,6 +376,22 @@ function showView(v) {
   if (v === 'stats') loadStats();
 }
 
+// 우상단 새로고침 — 페이지 리로드 없이(세션 유지) 현재 화면 데이터를 다시 불러온다.
+async function refreshCurrent() {
+  const btn = document.getElementById('refreshBtn');
+  btn.disabled = true; const label = btn.textContent; btn.textContent = '새로고침 중…';
+  Object.keys(statsCache).forEach(k => delete statsCache[k]);
+  try {
+    await load(); // 피드백 목록 + 신규 배지
+    if (currentView === 'stats') await loadStats();
+  } catch (e) {
+    if (e.status === 401) { alert('세션이 만료됐어요. 다시 로그인해 주세요'); logout(); return; }
+    alert('새로고침에 실패했어요: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = label;
+  }
+}
+
 const todayKST = () => new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
 const daysBefore = (day, n) =>
   new Date(new Date(day + 'T00:00:00Z').getTime() - n * 86400000).toISOString().slice(0, 10);
@@ -382,6 +445,16 @@ function bucket(daily, unit, fold) {
   }
   return [...m.keys()].sort().map(k => ({ date: k, ...m.get(k) }));
 }
+
+// 값이 없는 날짜(0명 일자)도 x축에 나오도록 [start,end] 모든 날짜를 zero 로 채운다.
+function fillDaily(daily, start, end, zero) {
+  if (!start || start > end) return daily || [];
+  const m = new Map((daily || []).filter(r => r && r.date).map(r => [r.date, r]));
+  const out = [];
+  for (let d = start; d <= end; d = daysBefore(d, -1)) out.push(m.get(d) || { date: d, ...zero });
+  return out;
+}
+const minDate = rows => (rows || []).reduce((m, r) => (!m || (r.date && r.date < m)) ? r.date : m, '');
 
 /* ── SVG 차트 (외부 lib 불가 — 직접 렌더). 공통 좌표계 + y눈금 3개 + x라벨 4~6개 ── */
 const CG = { w: 420, h: 180, l: 46, r: 46, t: 12, b: 26 };
@@ -499,7 +572,10 @@ function renderStats() {
     : Number(statsPeriod);
 
   // 버켓: 가입·토큰=합산, 활성=버켓 내 최대값(최대 일활성)
-  const suRows = bucket(signupDaily, statsUnit,
+  // 가입은 0명 일자도 x축에 나오도록 기간 전체 날짜를 0 으로 채운 뒤 버켓팅.
+  const suStart = statsPeriod === 'all' ? minDate(signupDaily) : cutoff;
+  const signupFilled = fillDaily(signupDaily, suStart, end, { count: 0 });
+  const suRows = bucket(signupFilled, statsUnit,
     (a, r) => ({ count: (a?.count || 0) + (Number(r.count) || 0) }));
   const acRows = bucket(activeDaily, statsUnit, (a, r) => ({
     app: Math.max(a?.app || 0, Number(r.app) || 0), ai: Math.max(a?.ai || 0, Number(r.ai) || 0) }));
@@ -566,12 +642,14 @@ function renderStats() {
   const maxNote = statsUnit === 'day' ? '' : ' · 최대 일활성';
   document.getElementById('statsBody').innerHTML = `
     <div class="kpis">${kpis}</div>
-    <div class="scard"><h2>가입 추이 (${UNIT_LABEL[statsUnit]})</h2>
-      ${barLineChart(suRows2, 'count', 'cum')}
-      ${suRows2.length ? legend([['#7FD6A4', '신규 (좌축)'], ['#35A866', '누적 (우축)']]) : ''}</div>
-    <div class="scard"><h2>활성 사용자 추이 (${UNIT_LABEL[statsUnit]}${maxNote})</h2>
-      ${twoLineChart(acRows, 'app', 'ai')}
-      ${acRows.length ? legend([['#35A866', '접속 (실선)'], ['#43C67A', 'AI 사용 (점선)']]) : ''}</div>
+    <div class="chart-2col">
+      <div class="scard"><h2>가입 추이 (${UNIT_LABEL[statsUnit]})</h2>
+        ${barLineChart(suRows2, 'count', 'cum')}
+        ${suRows2.length ? legend([['#7FD6A4', '신규 (좌축)'], ['#35A866', '누적 (우축)']]) : ''}</div>
+      <div class="scard"><h2>활성 사용자 추이 (${UNIT_LABEL[statsUnit]}${maxNote})</h2>
+        ${twoLineChart(acRows, 'app', 'ai')}
+        ${acRows.length ? legend([['#35A866', '접속 (실선)'], ['#43C67A', 'AI 사용 (점선)']]) : ''}</div>
+    </div>
     <div class="scard"><h2>AI 토큰 — 티어별 (${UNIT_LABEL[statsUnit]})</h2>
       <table class="tier"><thead><tr><th>티어</th><th>사용자</th><th>총 토큰</th><th>평균 월환산</th><th>캡 대비</th></tr></thead>
       <tbody>${tierRows}</tbody></table>
@@ -584,7 +662,7 @@ async function enter() {
   if (!await verifyAndLoad()) return; // 비관리자/실패 — 로그인 화면 유지
   document.getElementById('login').classList.add('hidden');
   document.getElementById('shell').classList.remove('hidden');
-  document.getElementById('who').textContent = sessionStorage.getItem('adminEmail') || '';
+  document.getElementById('who').textContent = localStorage.getItem('adminEmail') || '';
   showView('stats'); // 첫 화면 = 대시보드 (사이드바 첫 메뉴와 일치)
 }
 
