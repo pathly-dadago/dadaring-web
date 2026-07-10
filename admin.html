@@ -363,8 +363,8 @@ async function sendReply(id) {
 
 /* ── 📊 통계 뷰 ─────────────────────────────────────────────
    서버는 일별 배열만 주고(기본 90일, '전체'만 재호출) 기간·단위(일/주/월)
-   재계산은 전부 클라이언트. 활성의 주/월 값은 distinct 합산이 불가하므로
-   버켓 내 최대 DAU('최대 일활성')로 표기한다. */
+   재계산은 전부 클라이언트. 활성은 고유수라 클라 합산 불가 → 서버가 날짜별
+   롤링 고유수(DAU/WAU/MAU)를 함께 내려주고, 일/주/월 토글로 골라 그린다. */
 let currentView = 'feedback';
 let statsPeriod = '90', statsUnit = 'day';
 
@@ -593,14 +593,18 @@ function renderStats() {
     ? elapsedDays
     : Math.min(Number(statsPeriod), elapsedDays);
 
-  // 버켓: 가입·토큰=합산, 활성=버켓 내 최대값(최대 일활성)
+  // 버켓: 가입·토큰=합산, 활성=롤링 DAU/WAU/MAU(일→DAU, 주→WAU, 월→MAU).
   // 가입은 0명 일자도 x축에 나오도록 기간 전체 날짜를 0 으로 채운 뒤 버켓팅.
   const suStart = statsPeriod === 'all' ? minDate(signupDaily) : cutoff;
   const signupFilled = fillDaily(signupDaily, suStart, end, { count: 0 });
   const suRows = bucket(signupFilled, statsUnit,
     (a, r) => ({ count: (a?.count || 0) + (Number(r.count) || 0) }));
-  const acRows = bucket(activeDaily, statsUnit, (a, r) => ({
-    app: Math.max(a?.app || 0, Number(r.app) || 0), ai: Math.max(a?.ai || 0, Number(r.ai) || 0) }));
+  // 활성은 합산/최대가 아니라 '고유 사용자 수'. 서버가 날짜별 롤링 고유수를 주므로
+  // (appW/aiW=직전7일, appM/aiM=직전30일) 버켓의 마지막 날 값을 대표값으로 쓴다.
+  const acF = statsUnit === 'month' ? ['appM', 'aiM']
+            : statsUnit === 'week' ? ['appW', 'aiW'] : ['app', 'ai'];
+  const acRows = bucket(activeDaily, statsUnit,
+    (a, r) => ({ app: Number(r[acF[0]]) || 0, ai: Number(r[acF[1]]) || 0 }));
   const tkRows = bucket(tokenDaily, statsUnit, (a, r) => {
     const o = a || { total: 0, byTier: {} };
     o.total += Number(r.total) || 0;
@@ -661,14 +665,15 @@ function renderStats() {
 
   const legend = items => `<div class="legend">${items.map(([c, l]) =>
     `<span><i style="background:${c}"></i>${l}</span>`).join('')}</div>`;
-  const maxNote = statsUnit === 'day' ? '' : ' · 최대 일활성';
+  const acLabel = statsUnit === 'month' ? 'MAU · 30일 롤링'
+                : statsUnit === 'week' ? 'WAU · 7일 롤링' : 'DAU · 일별';
   document.getElementById('statsBody').innerHTML = `
     <div class="kpis">${kpis}</div>
     <div class="chart-2col">
       <div class="scard"><h2>가입 추이 (${UNIT_LABEL[statsUnit]})</h2>
         ${barLineChart(suRows2, 'count', 'cum')}
         ${suRows2.length ? legend([['#7FD6A4', '신규 (좌축)'], ['#35A866', '누적 (우축)']]) : ''}</div>
-      <div class="scard"><h2>활성 사용자 추이 (${UNIT_LABEL[statsUnit]}${maxNote})</h2>
+      <div class="scard"><h2>활성 사용자 추이 (${acLabel})</h2>
         ${twoLineChart(acRows, 'app', 'ai')}
         ${acRows.length ? legend([['#35A866', '접속 (실선)'], ['#43C67A', 'AI 사용 (점선)']]) : ''}</div>
     </div>
