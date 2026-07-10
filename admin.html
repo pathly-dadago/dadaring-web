@@ -436,6 +436,9 @@ function syncStatsChips() {
 const fmtInt = n => Math.round(Number(n) || 0).toLocaleString('ko-KR');
 const fmtTok = n => { n = Number(n) || 0;
   return n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1000 ? Math.round(n / 1000) + 'K' : String(n); };
+const fmtBytes = n => { n = Number(n) || 0; const kb = 1024, mb = kb * 1024, gb = mb * 1024;
+  return n < kb ? n + 'B' : n < mb ? (n / kb).toFixed(1) + 'KB'
+       : n < gb ? (n / mb).toFixed(1) + 'MB' : (n / gb).toFixed(2) + 'GB'; };
 
 // 일별 배열 → 단위 버켓 (week=월요일 시작일 키, month=YYYY-MM). fold 가 합산/최대 결정.
 function bucketKey(date, unit) {
@@ -663,6 +666,15 @@ function renderStats() {
       <div class="ftrack"><div class="ffill" style="width:${Math.max(2, Math.round(f.tokens / maxF * 100))}%"></div></div>
     </div>`).join('');
 
+  // 저장공간(사진) — 티어별 바이트. 서버 storage 섹션(없으면 0 방어).
+  const stor = data.storage || { total: 0, byTier: {} };
+  const storTiers = ['free', 'individual', 'family', 'premium', 'unknown'];
+  const maxS = Math.max(1, ...storTiers.map(t => Number(stor.byTier?.[t]) || 0));
+  const storHtml = storTiers.map(t => { const b = Number(stor.byTier?.[t]) || 0;
+    return `<div class="feat"><div class="fl">${TIER_NAMES[t] || t} · ${fmtBytes(b)}</div>`
+      + `<div class="ftrack"><div class="ffill" style="width:${Math.max(2, Math.round(b / maxS * 100))}%"></div></div></div>`;
+  }).join('');
+
   const legend = items => `<div class="legend">${items.map(([c, l]) =>
     `<span><i style="background:${c}"></i>${l}</span>`).join('')}</div>`;
   const acLabel = statsUnit === 'month' ? 'MAU · 30일 롤링'
@@ -682,7 +694,8 @@ function renderStats() {
       <tbody>${tierRows}</tbody></table>
       ${stackedBarChart(tkRows)}
       ${tkRows.length ? legend(TIER_SEGS.map(s => [s.color, s.label])) : ''}</div>
-    <div class="scard"><h2>기능별 AI 사용${featWindowNote()}</h2>${featHtml}</div>`;
+    <div class="scard"><h2>기능별 AI 사용${featWindowNote()}</h2>${featHtml}</div>
+    <div class="scard"><h2>저장공간 (사진) — 총 ${fmtBytes(stor.total)}</h2>${storHtml}</div>`;
 }
 
 async function enter() {
