@@ -584,9 +584,14 @@ function renderStats() {
   const signupDaily = inRange(data.signups?.daily);
   const activeDaily = inRange(data.active?.daily);
   const tokenDaily = inRange(data.tokens?.daily);
+  // 평균 월환산의 분모 일수. 선택 기간이 실제 데이터 기간(2026-01-01~오늘)보다
+  // 길면 데이터 경과일로 클램프 — 아니면 없는 날짜로 나눠 평균이 과소평가되고
+  // '전체'와 값이 어긋난다(361일 데이터가 쌓이기 전엔 1년=전체와 동일해야 정상).
+  const elapsedDays = Math.max(1,
+    Math.round((new Date(end) - new Date('2026-01-01')) / 86400000) + 1);
   const periodDays = statsPeriod === 'all'
-    ? Math.max(1, Math.round((new Date(end) - new Date('2026-01-01')) / 86400000) + 1)
-    : Number(statsPeriod);
+    ? elapsedDays
+    : Math.min(Number(statsPeriod), elapsedDays);
 
   // 버켓: 가입·토큰=합산, 활성=버켓 내 최대값(최대 일활성)
   // 가입은 0명 일자도 x축에 나오도록 기간 전체 날짜를 0 으로 채운 뒤 버켓팅.
