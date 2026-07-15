@@ -302,6 +302,14 @@ function logout() {
   location.reload();
 }
 
+// 세션 만료·인증 실패 시 리로드 없이 즉시 로그인 화면으로 전환한다(토큰 정리 + 안내).
+function showLogin(msg) {
+  ['adminIdToken', 'adminRefreshToken', 'adminEmail'].forEach(k => localStorage.removeItem(k));
+  document.getElementById('loginErr').textContent = msg || '';
+  document.getElementById('shell').classList.add('hidden');
+  document.getElementById('login').classList.remove('hidden');
+}
+
 async function api(path, opts = {}, _retried = false) {
   const res = await fetch(API + path, { ...opts,
     headers: { 'Content-Type': 'application/json',
@@ -327,13 +335,9 @@ async function verifyAndLoad() {
     await load();
     return true;
   } catch (e) {
-    ['adminIdToken', 'adminRefreshToken', 'adminEmail'].forEach(k => localStorage.removeItem(k));
-    const err = document.getElementById('loginErr');
-    err.textContent = e.status === 403 ? '관리자 계정이 아니에요'
+    showLogin(e.status === 403 ? '관리자 계정이 아니에요'
         : e.status === 401 ? '세션이 만료됐어요. 다시 로그인해 주세요'
-        : '목록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요';
-    document.getElementById('shell').classList.add('hidden');
-    document.getElementById('login').classList.remove('hidden');
+        : '목록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요');
     return false;
   }
 }
@@ -450,7 +454,8 @@ async function refreshCurrent() {
     await load(); // 피드백 목록 + 신규 배지
     if (currentView === 'stats') await loadStats();
   } catch (e) {
-    if (e.status === 401) { alert('세션이 만료됐어요. 다시 로그인해 주세요'); logout(); return; }
+    // 재로그인 필요(리프레시까지 실패) → 리로드 없이 즉시 로그인 화면으로.
+    if (e.status === 401) { showLogin('세션이 만료됐어요. 다시 로그인해 주세요'); return; }
     alert('새로고침에 실패했어요: ' + e.message);
   } finally {
     btn.disabled = false; btn.textContent = label;
@@ -821,7 +826,12 @@ async function enter() {
   showView('stats'); // 첫 화면 = 대시보드 (사이드바 첫 메뉴와 일치)
 }
 
-if (token()) enter();
+// 진입 시 리프레시 토큰(최대 365일)으로 IdToken 을 선제 재발급해 세션을 이어간다 —
+// IdToken 만료(24h)만으로 로그아웃되지 않게. 재발급 실패해도 기존 토큰으로 시도.
+(async () => {
+  if (localStorage.getItem('adminRefreshToken')) await tryRefresh();
+  if (token()) enter();
+})();
 </script>
 </body>
 </html>
