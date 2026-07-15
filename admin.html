@@ -67,23 +67,32 @@
     #viewStats{flex:1;height:100vh;overflow-y:auto;padding:18px 22px;}
     /* ── 구독 관리 뷰 ── */
     #viewSubs{flex:1;height:100vh;overflow-y:auto;padding:18px 22px;}
-    .subs-wrap{max-width:640px;}
+    .subs-wrap{max-width:720px;}
     .subs-wrap h2{font-size:19px;margin:0 0 8px;}
-    .subs-hint{color:var(--ts);font-size:13px;line-height:1.6;margin:0 0 18px;}
-    .subs-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+    .subs-hint{color:var(--ts);font-size:13px;line-height:1.6;margin:0 0 16px;}
+    .subs-add{background:var(--card);border:1px solid var(--divider);border-radius:12px;
+      padding:14px 16px;margin-bottom:22px;}
+    .subs-add-title{font-size:14px;font-weight:700;margin-bottom:10px;}
+    .subs-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
     .subs-row input,.subs-row select{padding:10px 12px;border:1px solid var(--divider);
-      border-radius:10px;background:var(--card);color:inherit;font-size:14px;}
-    #subEmail{flex:1;min-width:220px;}
-    #subMonths{width:110px;}
-    .subs-btns{display:flex;gap:8px;margin-bottom:16px;}
+      border-radius:10px;background:var(--bg,transparent);color:inherit;font-size:14px;}
+    #subEmail{flex:1;min-width:200px;}
+    #subMonths{width:96px;}
     .sb{padding:10px 18px;border:none;border-radius:10px;font-size:14px;font-weight:600;
       cursor:pointer;color:#fff;}
-    .sb-look{background:#5b6b7a;} .sb-grant{background:#2e9e6b;} .sb-revoke{background:#c0574a;}
-    .sb:hover{opacity:.9;}
-    .subs-result{font-size:14px;line-height:1.7;padding:14px 16px;border-radius:12px;
-      background:var(--card);border:1px solid var(--divider);min-height:20px;}
+    .sb-grant{background:#2e9e6b;} .sb:hover{opacity:.9;}
+    .subs-result{font-size:13px;line-height:1.6;padding:10px 12px;border-radius:10px;margin-top:10px;
+      border:1px solid var(--divider);}
     .subs-result.ok{border-color:#2e9e6b;} .subs-result.err{border-color:#c0574a;color:#c0574a;}
-    .subs-result .muted{color:var(--ts);}
+    .subs-table-head{font-size:14px;font-weight:700;margin-bottom:8px;}
+    .subs-table table{width:100%;border-collapse:collapse;font-size:13px;}
+    .subs-table th{text-align:left;color:var(--ts);font-weight:600;font-size:12px;
+      padding:6px 10px;border-bottom:1px solid var(--divider);}
+    .subs-table td{padding:8px 10px;border-bottom:1px solid var(--divider);}
+    .subs-table .muted{color:var(--ts);padding:14px 2px;}
+    .sb-mini{padding:5px 12px;border:none;border-radius:8px;font-size:12px;font-weight:600;
+      cursor:pointer;color:#fff;}
+    .sb-mini.sb-revoke{background:#c0574a;} .sb-mini:hover{opacity:.9;}
     .ctl-gap{width:12px;}
     .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;
       margin:14px 0;max-width:860px;}
@@ -203,23 +212,24 @@
     <div id="viewSubs" class="hidden">
       <div class="subs-wrap">
         <h2>구독 관리</h2>
-        <p class="subs-hint">스토어를 거치지 않고 계정에 구독(comp)을 부여·해제합니다. 테스터·데모·응대 comp 용도.<br>
-          부여 전 <b>조회</b>로 현재 상태를 확인하세요 — 실제 스토어 구독이 있으면 comp 로 덮어쓰게 됩니다.</p>
-        <div class="subs-row">
-          <input id="subEmail" type="email" placeholder="이메일 (예: user@example.com)" autocomplete="off">
-          <select id="subTier">
-            <option value="premium">프리미엄 (월 1200만 · 좌석 6)</option>
-            <option value="family">패밀리 (월 400만 · 좌석 4)</option>
-            <option value="individual">개인 (월 100만 · 좌석 1)</option>
-          </select>
-          <input id="subMonths" type="number" min="1" value="1200" title="구독 개월수 (1200 = 100년, 사실상 영구)">
+        <p class="subs-hint">스토어 없이 계정에 구독(comp)을 부여합니다. 테스터·데모·응대용.
+          실제 스토어 구독이 있으면 comp 로 덮어쓰니 주의하세요.</p>
+        <div class="subs-add">
+          <div class="subs-add-title">신규 구독 추가</div>
+          <div class="subs-row">
+            <input id="subEmail" type="email" placeholder="이메일 (예: user@example.com)" autocomplete="off">
+            <select id="subTier">
+              <option value="premium">프리미엄 (월 1200만 · 좌석 6)</option>
+              <option value="family">패밀리 (월 400만 · 좌석 4)</option>
+              <option value="individual">개인 (월 100만 · 좌석 1)</option>
+            </select>
+            <input id="subMonths" type="number" min="1" value="1200" title="구독 개월수 (1200 = 100년, 사실상 영구)">
+            <button class="sb sb-grant" onclick="subGrant()">부여</button>
+          </div>
+          <div id="subResult" class="subs-result" hidden></div>
         </div>
-        <div class="subs-btns">
-          <button class="sb sb-look" onclick="subLookup()">조회</button>
-          <button class="sb sb-grant" onclick="subGrant()">부여</button>
-          <button class="sb sb-revoke" onclick="subRevoke()">해제</button>
-        </div>
-        <div id="subResult" class="subs-result"></div>
+        <div class="subs-table-head">부여된 구독 <span id="subCount" class="cnt"></span></div>
+        <div id="subTable" class="subs-table"></div>
       </div>
     </div>
   </main>
@@ -428,6 +438,7 @@ function showView(v) {
   document.getElementById('menuStats').classList.toggle('off', v !== 'stats');
   document.getElementById('menuSubs').classList.toggle('off', v !== 'subs');
   if (v === 'stats') loadStats();
+  if (v === 'subs') subLoadList();
 }
 
 // 우상단 새로고침 — 페이지 리로드 없이(세션 유지) 현재 화면 데이터를 다시 불러온다.
@@ -449,53 +460,62 @@ async function refreshCurrent() {
 // ── 구독 관리(comp 부여/해제/조회) ──────────────────────────
 const TIER_KO = { free: '무료', individual: '개인', family: '패밀리', premium: '프리미엄' };
 
-function subEmailVal() {
-  const e = (document.getElementById('subEmail').value || '').trim().toLowerCase();
-  if (!e) { subShow('이메일을 입력하세요', 'err'); return null; }
-  return e;
-}
-
+// 부여 결과 한 줄 표시(성공/실패). 표는 subLoadList 가 별도로 그린다.
 function subShow(html, kind) {
   const el = document.getElementById('subResult');
+  el.hidden = false;
   el.className = 'subs-result' + (kind ? ' ' + kind : '');
   el.innerHTML = html;
 }
 
-function subFmt(sub) {
-  if (!sub) return '<span class="muted">구독 없음 (무료)</span>';
-  const store = sub.store === 'comp' ? 'comp(관리자 부여)' : esc(sub.store || '-');
-  return `티어 <b>${TIER_KO[sub.tier] || esc(sub.tier)}</b> · 상태 ${esc(sub.status || '-')}`
-    + ` · 스토어 ${store} · 만료 ${esc(fmt(sub.expiresAt) || '-')}`;
+// 부여된 comp 구독 표를 새로 그린다(탭 진입·부여·해제 후 호출).
+async function subLoadList() {
+  const wrap = document.getElementById('subTable');
+  wrap.innerHTML = '<div class="muted">불러오는 중…</div>';
+  try {
+    // email 없는 lookup = 부여된 comp 구독 목록 (별도 list 라우트 없음 — CFN 500 한도).
+    const { subs } = await api('/subscription/admin/lookup');
+    document.getElementById('subCount').textContent = subs.length || '';
+    if (!subs.length) { wrap.innerHTML = '<div class="muted">부여된 구독이 없어요.</div>'; return; }
+    wrap.innerHTML = `<table><thead><tr>
+        <th>이메일</th><th>티어</th><th>상태</th><th>만료</th><th></th></tr></thead><tbody>${
+      subs.map(s => `<tr>
+        <td>${esc(s.ownerEmail)}</td>
+        <td>${TIER_KO[s.tier] || esc(s.tier)}</td>
+        <td>${esc(s.status || '-')}</td>
+        <td>${esc(fmt(s.expiresAt) || '-')}</td>
+        <td><button class="sb-mini sb-revoke" data-email="${esc(s.ownerEmail)}">해제</button></td>
+      </tr>`).join('')}</tbody></table>`;
+    wrap.querySelectorAll('button[data-email]').forEach(b =>
+      b.onclick = () => subRevoke(b.dataset.email));
+  } catch (e) {
+    wrap.innerHTML = `<div class="subs-result err">목록을 못 불러왔어요: ${esc(e.message)}</div>`;
+  }
 }
 
-// 이메일 검증 → (선택)확인 → 진행중 표시 → run → 공통 에러 표시. 세 액션 공유.
-async function subCall(verb, busy, run, confirmFn) {
-  const email = subEmailVal(); if (!email) return;
-  if (confirmFn && !confirmFn(email)) return;
-  subShow(busy, '');
-  try { await run(email); }
-  catch (e) { subShow(verb + ' 실패: ' + esc(e.message), 'err'); }
-}
-
-const subLookup = () => subCall('조회', '조회 중…', async (email) => {
-  const r = await api('/subscription/admin/lookup?email=' + encodeURIComponent(email));
-  subShow(`<b>${esc(email)}</b><br>${subFmt(r.sub)}`, '');
-});
-
-const subGrant = () => {
+async function subGrant() {
+  const email = (document.getElementById('subEmail').value || '').trim().toLowerCase();
+  if (!email) { subShow('이메일을 입력하세요', 'err'); return; }
   const tier = document.getElementById('subTier').value;
   const months = parseInt(document.getElementById('subMonths').value, 10) || 1200;
-  return subCall('부여', '부여 중…', async (email) => {
-    const r = await api('/subscription/admin/grant',
+  if (!confirm(`${email} 에 ${TIER_KO[tier]} 구독을 ${months}개월 부여할까요?\n(실제 스토어 구독이 있으면 덮어씁니다)`)) return;
+  subShow('부여 중…', '');
+  try {
+    const { sub } = await api('/subscription/admin/grant',
       { method: 'POST', body: JSON.stringify({ email, tier, months }) });
-    subShow(`✅ 부여 완료 — <b>${esc(email)}</b><br>${subFmt(r.sub)}`, 'ok');
-  }, (email) => confirm(`${email} 에 ${TIER_KO[tier]} 구독을 ${months}개월 부여할까요?\n(실제 스토어 구독이 있으면 덮어씁니다)`));
-};
+    subShow(`✅ <b>${esc(email)}</b> — ${TIER_KO[sub.tier]} · ${esc(sub.status)} · 만료 ${esc(fmt(sub.expiresAt))}`, 'ok');
+    document.getElementById('subEmail').value = '';
+    await subLoadList();
+  } catch (e) { subShow('부여 실패: ' + esc(e.message), 'err'); }
+}
 
-const subRevoke = () => subCall('해제', '해제 중…', async (email) => {
-  await api('/subscription/admin/revoke', { method: 'POST', body: JSON.stringify({ email }) });
-  subShow(`🗑️ 해제 완료 — <b>${esc(email)}</b> 는 이제 무료입니다.`, 'ok');
-}, (email) => confirm(`${email} 의 구독을 해제할까요? (무료로 돌아갑니다)`));
+async function subRevoke(email) {
+  if (!confirm(`${email} 의 구독을 해제할까요? (무료로 돌아갑니다)`)) return;
+  try {
+    await api('/subscription/admin/revoke', { method: 'POST', body: JSON.stringify({ email }) });
+    await subLoadList();
+  } catch (e) { alert('해제 실패: ' + e.message); }
+}
 
 const todayKST = () => new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
 const daysBefore = (day, n) =>
