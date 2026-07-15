@@ -65,6 +65,25 @@
     /* ── 통계 뷰 ── */
     #viewFeedback{display:flex;flex:1;min-width:0;}
     #viewStats{flex:1;height:100vh;overflow-y:auto;padding:18px 22px;}
+    /* ── 구독 관리 뷰 ── */
+    #viewSubs{flex:1;height:100vh;overflow-y:auto;padding:18px 22px;}
+    .subs-wrap{max-width:640px;}
+    .subs-wrap h2{font-size:19px;margin:0 0 8px;}
+    .subs-hint{color:var(--ts);font-size:13px;line-height:1.6;margin:0 0 18px;}
+    .subs-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+    .subs-row input,.subs-row select{padding:10px 12px;border:1px solid var(--divider);
+      border-radius:10px;background:var(--card);color:inherit;font-size:14px;}
+    #subEmail{flex:1;min-width:220px;}
+    #subMonths{width:110px;}
+    .subs-btns{display:flex;gap:8px;margin-bottom:16px;}
+    .sb{padding:10px 18px;border:none;border-radius:10px;font-size:14px;font-weight:600;
+      cursor:pointer;color:#fff;}
+    .sb-look{background:#5b6b7a;} .sb-grant{background:#2e9e6b;} .sb-revoke{background:#c0574a;}
+    .sb:hover{opacity:.9;}
+    .subs-result{font-size:14px;line-height:1.7;padding:14px 16px;border-radius:12px;
+      background:var(--card);border:1px solid var(--divider);min-height:20px;}
+    .subs-result.ok{border-color:#2e9e6b;} .subs-result.err{border-color:#c0574a;color:#c0574a;}
+    .subs-result .muted{color:var(--ts);}
     .ctl-gap{width:12px;}
     .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;
       margin:14px 0;max-width:860px;}
@@ -152,6 +171,7 @@
     <div class="brand">DADAring 관리자</div>
     <button class="menu" id="menuStats" onclick="showView('stats')">📊 대시보드</button>
     <button class="menu off" id="menuFeedback" onclick="showView('feedback')">💬 피드백 <span class="cnt" id="newCnt"></span></button>
+    <button class="menu off" id="menuSubs" onclick="showView('subs')">💳 구독</button>
     <div class="side-foot"><span id="who"></span><br><button onclick="logout()">로그아웃</button></div>
   </nav>
   <main class="content">
@@ -179,6 +199,28 @@
         <button class="chip" data-u="month" onclick="setStatsUnit('month')">월</button>
       </div>
       <div id="statsBody"></div>
+    </div>
+    <div id="viewSubs" class="hidden">
+      <div class="subs-wrap">
+        <h2>구독 관리</h2>
+        <p class="subs-hint">스토어를 거치지 않고 계정에 구독(comp)을 부여·해제합니다. 테스터·데모·응대 comp 용도.<br>
+          부여 전 <b>조회</b>로 현재 상태를 확인하세요 — 실제 스토어 구독이 있으면 comp 로 덮어쓰게 됩니다.</p>
+        <div class="subs-row">
+          <input id="subEmail" type="email" placeholder="이메일 (예: user@example.com)" autocomplete="off">
+          <select id="subTier">
+            <option value="premium">프리미엄 (월 1200만 · 좌석 6)</option>
+            <option value="family">패밀리 (월 400만 · 좌석 4)</option>
+            <option value="individual">개인 (월 100만 · 좌석 1)</option>
+          </select>
+          <input id="subMonths" type="number" min="1" value="1200" title="구독 개월수 (1200 = 100년, 사실상 영구)">
+        </div>
+        <div class="subs-btns">
+          <button class="sb sb-look" onclick="subLookup()">조회</button>
+          <button class="sb sb-grant" onclick="subGrant()">부여</button>
+          <button class="sb sb-revoke" onclick="subRevoke()">해제</button>
+        </div>
+        <div id="subResult" class="subs-result"></div>
+      </div>
     </div>
   </main>
 </div>
@@ -381,8 +423,10 @@ function showView(v) {
   currentView = v;
   document.getElementById('viewFeedback').classList.toggle('hidden', v !== 'feedback');
   document.getElementById('viewStats').classList.toggle('hidden', v !== 'stats');
+  document.getElementById('viewSubs').classList.toggle('hidden', v !== 'subs');
   document.getElementById('menuFeedback').classList.toggle('off', v !== 'feedback');
   document.getElementById('menuStats').classList.toggle('off', v !== 'stats');
+  document.getElementById('menuSubs').classList.toggle('off', v !== 'subs');
   if (v === 'stats') loadStats();
 }
 
@@ -401,6 +445,57 @@ async function refreshCurrent() {
     btn.disabled = false; btn.textContent = label;
   }
 }
+
+// ── 구독 관리(comp 부여/해제/조회) ──────────────────────────
+const TIER_KO = { free: '무료', individual: '개인', family: '패밀리', premium: '프리미엄' };
+
+function subEmailVal() {
+  const e = (document.getElementById('subEmail').value || '').trim().toLowerCase();
+  if (!e) { subShow('이메일을 입력하세요', 'err'); return null; }
+  return e;
+}
+
+function subShow(html, kind) {
+  const el = document.getElementById('subResult');
+  el.className = 'subs-result' + (kind ? ' ' + kind : '');
+  el.innerHTML = html;
+}
+
+function subFmt(sub) {
+  if (!sub) return '<span class="muted">구독 없음 (무료)</span>';
+  const store = sub.store === 'comp' ? 'comp(관리자 부여)' : esc(sub.store || '-');
+  return `티어 <b>${TIER_KO[sub.tier] || esc(sub.tier)}</b> · 상태 ${esc(sub.status || '-')}`
+    + ` · 스토어 ${store} · 만료 ${esc(fmt(sub.expiresAt) || '-')}`;
+}
+
+// 이메일 검증 → (선택)확인 → 진행중 표시 → run → 공통 에러 표시. 세 액션 공유.
+async function subCall(verb, busy, run, confirmFn) {
+  const email = subEmailVal(); if (!email) return;
+  if (confirmFn && !confirmFn(email)) return;
+  subShow(busy, '');
+  try { await run(email); }
+  catch (e) { subShow(verb + ' 실패: ' + esc(e.message), 'err'); }
+}
+
+const subLookup = () => subCall('조회', '조회 중…', async (email) => {
+  const r = await api('/subscription/admin/lookup?email=' + encodeURIComponent(email));
+  subShow(`<b>${esc(email)}</b><br>${subFmt(r.sub)}`, '');
+});
+
+const subGrant = () => {
+  const tier = document.getElementById('subTier').value;
+  const months = parseInt(document.getElementById('subMonths').value, 10) || 1200;
+  return subCall('부여', '부여 중…', async (email) => {
+    const r = await api('/subscription/admin/grant',
+      { method: 'POST', body: JSON.stringify({ email, tier, months }) });
+    subShow(`✅ 부여 완료 — <b>${esc(email)}</b><br>${subFmt(r.sub)}`, 'ok');
+  }, (email) => confirm(`${email} 에 ${TIER_KO[tier]} 구독을 ${months}개월 부여할까요?\n(실제 스토어 구독이 있으면 덮어씁니다)`));
+};
+
+const subRevoke = () => subCall('해제', '해제 중…', async (email) => {
+  await api('/subscription/admin/revoke', { method: 'POST', body: JSON.stringify({ email }) });
+  subShow(`🗑️ 해제 완료 — <b>${esc(email)}</b> 는 이제 무료입니다.`, 'ok');
+}, (email) => confirm(`${email} 의 구독을 해제할까요? (무료로 돌아갑니다)`));
 
 const todayKST = () => new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
 const daysBefore = (day, n) =>
