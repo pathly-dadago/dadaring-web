@@ -665,15 +665,14 @@ function twoLineChart(rows, k1, k2) {
     + xLabelsSvg(rows) + '</svg>';
 }
 
-// 토큰: 티어별 누적 막대 (패밀리+프리미엄 합산 3색)
+// 토큰: 티어별 누적 막대 (4티어 개별, 연한→진한 초록)
 const TIER_SEGS = [
-  { key: 'free',       label: '무료',            color: '#D9F2E3' },
-  { key: 'individual', label: '개인',            color: '#7FD6A4' },
-  { key: 'fp',         label: '패밀리+프리미엄',  color: '#35A866' },
+  { key: 'free',       label: '무료',     color: '#D9F2E3' },
+  { key: 'individual', label: '개인',     color: '#7FD6A4' },
+  { key: 'family',     label: '패밀리',   color: '#43C67A' },
+  { key: 'premium',    label: '프리미엄', color: '#2A8F55' },
 ];
-const segVal = (r, k) => k === 'fp'
-  ? (Number(r.byTier?.family) || 0) + (Number(r.byTier?.premium) || 0)
-  : (Number(r.byTier?.[k]) || 0);
+const segVal = (r, k) => Number(r.byTier?.[k]) || 0;
 
 function stackedBarChart(rows) {
   if (!rows.length) return EMPTY_CHART;
