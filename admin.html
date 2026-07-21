@@ -119,6 +119,19 @@
     .mkt-rich{font-weight:700;}
     .mkt-hint{background:var(--bg);border:1px dashed var(--divider);border-radius:10px;
       padding:8px 12px;font-size:12px;color:var(--ts);margin-top:10px;}
+    .mkt-row{display:flex;align-items:center;gap:14px;background:var(--card);
+      border:1px solid var(--divider);border-radius:14px;padding:14px 16px;
+      margin-top:12px;cursor:pointer;transition:box-shadow .15s;}
+    .mkt-row:hover{box-shadow:0 4px 14px rgba(31,51,41,.08);}
+    .mkt-row-thumb{width:56px;height:56px;object-fit:cover;border-radius:10px;
+      border:1px solid var(--divider);flex-shrink:0;}
+    .mkt-row-body{flex:1;min-width:0;}
+    .mkt-row-title{font-weight:700;font-size:14px;}
+    .mkt-row-sub{color:var(--ts);font-size:12px;margin-top:2px;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .mkt-row-arrow{color:var(--ts);font-size:20px;}
+    .mkt-back{background:none;border:0;color:var(--greenD,#35A866);font-size:13px;
+      font-weight:700;cursor:pointer;padding:4px 0;}
     .sb-mini{padding:5px 12px;border:none;border-radius:8px;font-size:12px;font-weight:600;
       cursor:pointer;color:#fff;}
     .sb-mini.sb-revoke{background:#c0574a;} .sb-mini:hover{opacity:.9;}
@@ -869,21 +882,38 @@ async function enter() {
 
 // 진입 시 리프레시 토큰(최대 365일)으로 IdToken 을 선제 재발급해 세션을 이어간다 —
 // ── 마케팅 원고(정적 데이터, marketing-content.js) ──────────────
-let mktRendered = false;
+// 목록 → 클릭 → 상세 구조. renderMarketing()=목록, mktOpen(i)=상세.
 function renderMarketing() {
-  if (mktRendered) return;   // 정적 데이터라 1회만 렌더
-  mktRendered = true;
   const posts = window.MARKETING_POSTS || [];
   const box = document.getElementById('mktBody');
   if (!posts.length) { box.innerHTML = '<div class="empty">등록된 원고가 없어요</div>'; return; }
+  box.innerHTML = `
+    <div class="mkt-hint">📲 표준 앱 링크(기기 자동 구분): <b id="mktapplink">https://www.dadaring.com/app</b>
+      <button class="mkt-copy" onclick="mktCopy('mktapplink', this)">복사</button>
+      — 인스타 프로필 링크·모든 포스트에 이걸 쓰세요.</div>
+    ${posts.map((p, i) => `
+    <div class="mkt-row" onclick="mktOpen(${i})">
+      <img class="mkt-row-thumb" src="${p.instagram.images[0] || p.naver.images[0] || ''}" alt="">
+      <div class="mkt-row-body">
+        <div class="mkt-row-title">${esc(p.title)}</div>
+        <div class="mkt-row-sub">${esc(p.date)} · ${esc(p.naver.title)}</div>
+      </div>
+      <span class="mkt-row-arrow">›</span>
+    </div>`).join('')}`;
+}
+
+function mktOpen(i) {
+  const p = (window.MARKETING_POSTS || [])[i];
+  const box = document.getElementById('mktBody');
+  const id = `mkt${i}`;
 
   const sec = (label, btnsHtml, bodyHtml) => `
     <div class="mkt-sec">
       <div class="mkt-sec-head">${label} ${btnsHtml || ''}</div>
       ${bodyHtml}
     </div>`;
-  const copyBtn = (id, label) => `<button class="mkt-copy" onclick="mktCopy('${id}', this)">${label || '복사'}</button>`;
-  const pre = (id, text) => `<pre class="mkt-pre" id="${id}">${esc(text)}</pre>`;
+  const copyBtn = (cid, label) => `<button class="mkt-copy" onclick="mktCopy('${cid}', this)">${label || '복사'}</button>`;
+  const pre = (cid, text) => `<pre class="mkt-pre" id="${cid}">${esc(text)}</pre>`;
   const imgs = arr => `<div class="mkt-imgs">${arr.map(u => `
     <div class="mkt-img">
       <img src="${u}" alt="">
@@ -893,17 +923,16 @@ function renderMarketing() {
       </div>
     </div>`).join('')}</div>`;
 
-  box.innerHTML = posts.map((p, i) => {
-    const id = `mkt${i}`;
-    return `<div class="mkt-post">
+  box.innerHTML = `
+    <button class="mkt-back" onclick="renderMarketing()">← 원고 목록</button>
+    <div class="mkt-post">
       <div class="mkt-post-head">
         <h3>${esc(p.title)}</h3><span class="date">${esc(p.date)}</span>
         <a href="${p.blogUrl}" target="_blank" rel="noopener">블로그 원문 ↗</a>
       </div>
       <div class="mkt-hint">🟩 네이버는 <b>본문 전체 복사</b> 하나면 끝 — 에디터에 붙여넣으면 문단·굵기·이미지가 그대로 들어가요. (제목·태그는 별도 칸이라 각각 복사)<br>
-        📲 표준 앱 링크(기기 자동 구분): <b id="${id}applink">https://www.dadaring.com/app</b>
-        <button class="mkt-copy" onclick="mktCopy('${id}applink', this)">복사</button>
-        — 인스타 프로필 링크·모든 포스트에 이걸 쓰세요.</div>
+        📲 표준 앱 링크: <b id="${id}applink">https://www.dadaring.com/app</b>
+        <button class="mkt-copy" onclick="mktCopy('${id}applink', this)">복사</button></div>
       ${sec('🟩 네이버 · 제목', copyBtn(id + 'nt'), pre(id + 'nt', p.naver.title))}
       ${sec('🟩 네이버 · 본문',
         `<button class="mkt-copy mkt-rich" onclick="mktCopyRich(${i}, this)">📋 본문 전체 복사 (서식·이미지 포함)</button> ${copyBtn(id + 'nb', '텍스트만')}`,
@@ -917,7 +946,7 @@ function renderMarketing() {
       ${p.threads.map((t, j) =>
         sec(`⬛ 스레드/X · 포스트 ${j + 1}`, copyBtn(id + 'th' + j), pre(id + 'th' + j, t))).join('')}
     </div>`;
-  }).join('');
+  document.getElementById('viewMarketing').scrollTop = 0;
 }
 
 function mktFlash(btn, text, ok = true) {
