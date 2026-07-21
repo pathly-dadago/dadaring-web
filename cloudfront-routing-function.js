@@ -20,6 +20,13 @@ function handler(event) {
     else if (uri === '/get-app' || uri === '/app') {
         request.uri = '/get-app.html';
     }
+    // /blog  →  blog index,  /blog/<slug>  →  post HTML
+    else if (uri === '/blog' || uri === '/blog/') {
+        request.uri = '/blog/index.html';
+    }
+    else if (uri.match(/^\/blog\/[a-z0-9-]+$/)) {
+        request.uri = uri + '.html';
+    }
 
     return request;
 }
