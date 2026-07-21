@@ -900,7 +900,10 @@ function renderMarketing() {
         <h3>${esc(p.title)}</h3><span class="date">${esc(p.date)}</span>
         <a href="${p.blogUrl}" target="_blank" rel="noopener">블로그 원문 ↗</a>
       </div>
-      <div class="mkt-hint">🟩 네이버는 <b>본문 전체 복사</b> 하나면 끝 — 에디터에 붙여넣으면 문단·굵기·이미지가 그대로 들어가요. (제목·태그는 별도 칸이라 각각 복사)</div>
+      <div class="mkt-hint">🟩 네이버는 <b>본문 전체 복사</b> 하나면 끝 — 에디터에 붙여넣으면 문단·굵기·이미지가 그대로 들어가요. (제목·태그는 별도 칸이라 각각 복사)<br>
+        📲 표준 앱 링크(기기 자동 구분): <b id="${id}applink">https://www.dadaring.com/app</b>
+        <button class="mkt-copy" onclick="mktCopy('${id}applink', this)">복사</button>
+        — 인스타 프로필 링크·모든 포스트에 이걸 쓰세요.</div>
       ${sec('🟩 네이버 · 제목', copyBtn(id + 'nt'), pre(id + 'nt', p.naver.title))}
       ${sec('🟩 네이버 · 본문',
         `<button class="mkt-copy mkt-rich" onclick="mktCopyRich(${i}, this)">📋 본문 전체 복사 (서식·이미지 포함)</button> ${copyBtn(id + 'nb', '텍스트만')}`,
