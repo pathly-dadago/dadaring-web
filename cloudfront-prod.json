@@ -47,8 +47,8 @@
     "Items": [
       {
         "ErrorCode": 403,
-        "ResponseCode": "200",
-        "ResponsePagePath": "/index.html",
+        "ResponseCode": "404",
+        "ResponsePagePath": "/404.html",
         "ErrorCachingMinTTL": 300
       }
     ]

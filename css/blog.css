@@ -1,0 +1,133 @@
+/* ============================================
+   DADAring Blog
+   style.css의 브랜드 토큰(:root 변수)을 재사용한다.
+   ============================================ */
+
+/* ── 공통 컨테이너 ── */
+.blog-list, .post {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 120px 24px 80px;
+}
+
+/* ── 목록 페이지 ── */
+.blog-list h1 {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+.blog-list .blog-intro {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+}
+.post-card {
+  display: block;
+  background: var(--card);
+  border: 1px solid var(--divider);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 16px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.post-card:hover {
+  text-decoration: none;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(31, 51, 41, 0.08);
+}
+.post-card .post-date {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-bottom: 6px;
+}
+.post-card h2 {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.post-card p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* ── 글 페이지 ── */
+.post header h1 {
+  font-size: clamp(24px, 5vw, 32px);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.35;
+  margin-bottom: 12px;
+}
+.post .post-meta {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-bottom: 40px;
+}
+.post h2 {
+  font-size: 21px;
+  font-weight: 700;
+  margin: 44px 0 14px;
+}
+.post h3 {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 28px 0 10px;
+}
+.post p, .post li {
+  font-size: 15.5px;
+  line-height: 1.9;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+.post ul, .post ol { padding-left: 22px; margin-bottom: 16px; }
+.post li { margin-bottom: 8px; }
+.post strong { color: var(--primary-dark); }
+.post figure {
+  margin: 28px auto;
+  max-width: 340px;
+}
+.post figure img {
+  width: 100%;
+  height: auto;
+  border-radius: 20px;
+  border: 1px solid var(--divider);
+  box-shadow: 0 8px 28px rgba(31, 51, 41, 0.1);
+}
+.post figcaption {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 10px;
+}
+.post .post-tip {
+  background: var(--primary-surface);
+  border: 1px solid var(--divider);
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-size: 14px;
+  line-height: 1.8;
+  margin: 24px 0;
+}
+.post .post-tip strong { display: block; margin-bottom: 4px; }
+
+/* ── 글 하단 CTA ── */
+.post-cta {
+  text-align: center;
+  background: var(--primary-surface);
+  border-radius: 20px;
+  padding: 36px 24px;
+  margin: 56px 0 0;
+}
+.post-cta h2 { margin: 0 0 8px; font-size: 20px; }
+.post-cta p { margin-bottom: 20px; color: var(--text-secondary); font-size: 14px; }
+
+/* ── 목록으로 돌아가기 ── */
+.post-back {
+  display: inline-block;
+  margin-top: 32px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}

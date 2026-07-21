@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<!-- 인스타 카드뉴스 렌더 소스 (1080x1350, 4:5). #card1~#card6 해시로 한 장씩 표시.
+     캡처: chrome headless -\-window-size=1080,1350 -\-screenshot=cardN.png cards.html#cardN -->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+  :root {
+    --primary: #43C67A; --primary-dark: #35A866; --surface: #EAF8F0;
+    --bg: #F5FFF9; --ink: #2D3436; --sub: #5E7468;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard', sans-serif; word-break: keep-all; }
+  .card { display: none; width: 1080px; height: 1350px; position: relative; overflow: hidden;
+          background: var(--bg); flex-direction: column; padding: 90px 84px; }
+  .card:target { display: flex; }
+  .brand { position: absolute; top: 64px; right: 84px; font-size: 34px; font-weight: 800;
+           color: var(--primary-dark); letter-spacing: -1px; }
+  .pageno { position: absolute; bottom: 56px; right: 84px; font-size: 26px; color: #B8C5D0; font-weight: 600; }
+  .kicker { font-size: 34px; font-weight: 700; color: var(--primary-dark); margin-bottom: 28px; }
+  h1 { font-size: 82px; font-weight: 800; line-height: 1.28; letter-spacing: -2px; color: var(--ink); }
+  h1 .hl { color: var(--primary-dark); }
+  .sub { font-size: 40px; line-height: 1.6; color: var(--sub); margin-top: 40px; font-weight: 500; }
+  .center { justify-content: center; }
+  .bubble { background: #fff; border: 3px solid var(--surface); border-radius: 44px 44px 44px 8px;
+            padding: 44px 52px; font-size: 56px; font-weight: 700; color: var(--ink);
+            box-shadow: 0 16px 40px rgba(31,51,41,.08); width: fit-content; margin-bottom: 36px; }
+  .bubble.me { border-radius: 44px 44px 8px 44px; background: var(--surface); align-self: flex-end; }
+  .shot-wrap { flex: 1; display: flex; align-items: center; justify-content: center; margin-top: 48px; }
+  .shot-wrap img { height: 760px; border-radius: 36px; border: 2px solid #D8F0E3;
+                   box-shadow: 0 24px 64px rgba(31,51,41,.14); }
+  .rows { margin-top: 64px; display: flex; flex-direction: column; gap: 36px; }
+  .row { background: #fff; border: 2px solid #D8F0E3; border-radius: 32px; padding: 44px 48px;
+         display: flex; gap: 36px; align-items: flex-start;
+         box-shadow: 0 12px 32px rgba(31,51,41,.06); }
+  .row .emoji { font-size: 64px; line-height: 1.1; }
+  .row h3 { font-size: 44px; font-weight: 800; color: var(--ink); margin-bottom: 10px; }
+  .row p { font-size: 34px; line-height: 1.55; color: var(--sub); }
+  .cta-box { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+             border-radius: 48px; padding: 96px 72px; text-align: center; margin-top: 72px; }
+  .cta-box h2 { font-size: 72px; font-weight: 800; color: #fff; letter-spacing: -1px; }
+  .cta-box p { font-size: 40px; color: rgba(255,255,255,.9); margin-top: 24px; }
+  .stores { display: flex; gap: 28px; justify-content: center; margin-top: 56px; }
+  .stores span { background: #2D3436; color: #fff; font-size: 36px; font-weight: 700;
+                 padding: 28px 48px; border-radius: 24px; }
+</style>
+</head>
+<body>
+
+<!-- 1: 훅 -->
+<section class="card center" id="card1">
+  <div class="brand">DADAring</div>
+  <div class="bubble">엄마, 나 오늘<br>태권도야? 피아노야? 🥋🎹</div>
+  <div class="bubble me">어… 잠깐만… 📱</div>
+  <h1 style="margin-top:72px;">매일 아침<br>반복되는 <span class="hl">그 질문</span></h1>
+  <p class="sub">월요일 영어, 화요일 피아노, 수요일 태권도…<br>애가 둘이면 경우의 수는 두 배.</p>
+  <div class="pageno">1 / 6</div>
+</section>
+
+<!-- 2: 문제 공감 -->
+<section class="card center" id="card2">
+  <div class="brand">DADAring</div>
+  <h1>캘린더 열고,<br>메모 찾고,<br>단톡방 뒤지고…</h1>
+  <p class="sub">그 사이 등원 준비 시간은 이미 빠듯해져 있죠.<br>확인만 하는 데 왜 이렇게 손이 많이 갈까요?</p>
+  <div class="pageno">2 / 6</div>
+</section>
+
+<!-- 3: 해법 -->
+<section class="card" id="card3">
+  <div class="brand">DADAring</div>
+  <div class="kicker">다다링 홈 화면 위젯</div>
+  <h1>앱을 열지 않아도,<br><span class="hl">홈 화면에 이미</span><br>떠 있으니까.</h1>
+  <div class="shot-wrap"><img src="../../../images/shot-widget-680.jpg" alt=""></div>
+  <div class="pageno">3 / 6</div>
+</section>
+
+<!-- 4: 기능 -->
+<section class="card" id="card4">
+  <div class="brand">DADAring</div>
+  <div class="kicker">위젯 2종</div>
+  <h1>오늘도, 이번 주도<br><span class="hl">한눈에</span></h1>
+  <div class="rows">
+    <div class="row"><div class="emoji">☀️</div><div><h3>오늘 위젯</h3><p>끝난 활동 · 지금 활동 · 다음 활동까지 시간순으로</p></div></div>
+    <div class="row"><div class="emoji">🗓️</div><div><h3>주간 위젯</h3><p>일주일 학원 시간표를 색상 블록으로</p></div></div>
+    <div class="row"><div class="emoji">👧👦</div><div><h3>자녀별 위젯</h3><p>첫째·둘째 나란히, 테마도 골라서</p></div></div>
+  </div>
+  <div class="pageno">4 / 6</div>
+</section>
+
+<!-- 5: 가족 공유 -->
+<section class="card center" id="card5">
+  <div class="brand">DADAring</div>
+  <h1>"오늘 누가<br>데리러 가?"</h1>
+  <p class="sub">이 카톡, 이제 안 해도 돼요.<br><br>배우자 폰, 할머니 폰, 아이 폰까지 —<br><strong style="color:var(--primary-dark);">같은 일정이 실시간으로</strong> 떠 있으니까요.<br>아이는 위젯 보고 스스로 챙기기 시작합니다.</p>
+  <div class="pageno">5 / 6</div>
+</section>
+
+<!-- 6: CTA -->
+<section class="card center" id="card6">
+  <div class="brand">DADAring</div>
+  <h1>아이의 하루를<br><span class="hl">스마트하게</span></h1>
+  <p class="sub">학원 일정 · 위젯 · 가족 공유 · 학원비 · 알림장</p>
+  <div class="cta-box">
+    <h2>다다링, 무료로 시작</h2>
+    <p>스토어에서 "다다링"을 검색하세요</p>
+    <div class="stores"><span>🍎 App Store</span><span>🤖 Google Play</span></div>
+  </div>
+  <div class="pageno">6 / 6</div>
+</section>
+
+</body>
+</html>

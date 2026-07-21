@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<!--
+  블로그 새 글 템플릿 (docs/는 배포 제외 — 이 파일이 유일한 카피 원본)
+  새 글 체크리스트:
+    1. 이 파일을 blog/<slug>.html 로 복사, TODO 전부 치환
+    2. blog/index.html 목록 맨 위에 카드 추가
+    3. sitemap.xml 에 <url> 한 줄 추가
+    4. 본문 이미지는 680px JPEG로 변환해 images/ 에 추가
+       (sips -s format jpeg -s formatOptions 82 -\-resampleWidth 680 <src> -\-out images/<name>-680.jpg)
+-->
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TODO-검색키워드-포함-제목 — 다다링</title>
+  <meta name="description" content="TODO-검색결과에 보일 요약 (120자 내외)">
+  <link rel="canonical" href="https://dadaring.com/blog/TODO-slug">
+  <meta property="og:title" content="TODO-공유시-보일-제목">
+  <meta property="og:description" content="TODO-공유시-보일-요약">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://dadaring.com/blog/TODO-slug">
+  <meta property="og:image" content="https://dadaring.com/images/TODO-680.jpg">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/blog.css">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "TODO-제목",
+    "description": "TODO-요약",
+    "image": "https://dadaring.com/images/TODO-680.jpg",
+    "datePublished": "TODO-YYYY-MM-DD",
+    "dateModified": "TODO-YYYY-MM-DD",
+    "author": { "@type": "Organization", "name": "DADAring" },
+    "publisher": { "@type": "Organization", "name": "DADAGO", "url": "https://dadaring.com" },
+    "mainEntityOfPage": "https://dadaring.com/blog/TODO-slug"
+  }
+  </script>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">DADAring</a>
+    <div class="nav-links">
+      <a href="/">홈</a>
+      <a href="/blog">블로그</a>
+    </div>
+  </div>
+</nav>
+
+<article class="post">
+  <header>
+    <h1>TODO-제목</h1>
+    <p class="post-meta">TODO-YYYY년 M월 D일 · 다다링 활용법 #N</p>
+  </header>
+
+  <p>TODO-본문. 공감 인트로 → 기능 소개 → 사용법 → 연계 기능 → CTA 순.</p>
+
+  <figure>
+    <img src="/images/TODO-680.jpg" alt="TODO-이미지-설명" width="680" height="1472" loading="lazy" decoding="async">
+    <figcaption>TODO-캡션</figcaption>
+  </figure>
+
+  <div class="post-tip">
+    <strong>💡 활용 팁</strong>
+    TODO-팁 내용
+  </div>
+
+  <section class="post-cta">
+    <h2>다다링, 무료로 시작하세요</h2>
+    <p>TODO-한 줄 훅</p>
+    <div class="store-buttons">
+      <a href="https://apps.apple.com/app/id6769691549" class="hero-cta store-button" rel="noopener">🍎 App Store</a>
+      <a href="https://play.google.com/store/apps/details?id=com.dadaring.app" class="hero-cta store-button" rel="noopener">🤖 Google Play</a>
+    </div>
+  </section>
+
+  <a class="post-back" href="/blog">← 블로그 목록으로</a>
+</article>
+
+<footer class="footer">
+  <div class="footer-bottom">
+    &copy; 2026 DADAGO. All rights reserved. · <a href="/privacy" style="color:inherit;">개인정보 처리방침</a> · <a href="/terms" style="color:inherit;">이용약관</a>
+  </div>
+</footer>
+
+</body>
+</html>

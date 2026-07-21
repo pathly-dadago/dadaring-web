@@ -16,9 +16,21 @@ function handler(event) {
     if (uri.match(/^\/invite\/[A-Z0-9]+$/i)) {
         request.uri = '/invite.html';
     }
-    // /get-app  →  /get-app.html  (pretty URL alias)
-    else if (uri === '/get-app' || uri === '/app') {
+    // /app  →  /get-app.html  (short alias; no app.html exists)
+    else if (uri === '/app') {
         request.uri = '/get-app.html';
+    }
+    // section root without slash  (/blog → /blog/index.html)
+    else if (uri === '/blog') {
+        request.uri = '/blog/index.html';
+    }
+    // trailing slash → directory index  (/ → /index.html, /blog/ → /blog/index.html)
+    else if (uri.endsWith('/')) {
+        request.uri = uri + 'index.html';
+    }
+    // extensionless page → .html  (/get-app, /blog/<slug>, /privacy, ...)
+    else if (!uri.split('/').pop().includes('.')) {
+        request.uri = uri + '.html';
     }
 
     return request;
