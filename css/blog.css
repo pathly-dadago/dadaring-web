@@ -3,12 +3,14 @@
    style.css의 브랜드 토큰(:root 변수)을 재사용한다.
    ============================================ */
 
-/* ── 목록 페이지 ── */
-.blog-list {
+/* ── 공통 컨테이너 ── */
+.blog-list, .post {
   max-width: 720px;
   margin: 0 auto;
   padding: 120px 24px 80px;
 }
+
+/* ── 목록 페이지 ── */
 .blog-list h1 {
   font-size: 32px;
   font-weight: 800;
@@ -52,11 +54,6 @@
 }
 
 /* ── 글 페이지 ── */
-.post {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 120px 24px 40px;
-}
 .post header h1 {
   font-size: clamp(24px, 5vw, 32px);
   font-weight: 800;
@@ -126,7 +123,6 @@
 }
 .post-cta h2 { margin: 0 0 8px; font-size: 20px; }
 .post-cta p { margin-bottom: 20px; color: var(--text-secondary); font-size: 14px; }
-.post-cta .store-buttons { justify-content: center; }
 
 /* ── 목록으로 돌아가기 ── */
 .post-back {

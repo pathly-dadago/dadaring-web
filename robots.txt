@@ -1,7 +1,10 @@
 User-agent: *
 Allow: /
+Disallow: /admin
 Disallow: /admin.html
+Disallow: /invite
 Disallow: /invite.html
+Disallow: /delete-account
 Disallow: /delete-account.html
 
 Sitemap: https://dadaring.com/sitemap.xml
