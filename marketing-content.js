@@ -61,7 +61,7 @@ window.MARKETING_POSTS = [
 배우자·조부모·아이 폰까지 같은 일정이 실시간으로 떠서
 "오늘 누가 데리러 가?" 카톡도 사라져요.
 
-다다링, 무료로 시작 → 프로필 링크 (dadaring.com/app)
+다다링, 무료로 시작 → 프로필 링크 (www.dadaring.com/app)
 
 #아이일정관리 #학원시간표 #초등학부모 #워킹맘 #맞벌이육아 #학원스케줄 #육아꿀팁 #홈화면위젯 #육아앱추천 #다다링`,
       images: [1, 2, 3, 4, 5, 6].map(n => `/images/marketing/2026-07-21-widget/card${n}.png`),
