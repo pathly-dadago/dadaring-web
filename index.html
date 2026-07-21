@@ -301,6 +301,7 @@
   function show() { overlay.hidden = false; status.textContent = ""; msg.focus(); }
   function hide() { overlay.hidden = true; }
   document.getElementById("feedback-open").addEventListener("click", function (e) { e.preventDefault(); show(); });
+  if (location.hash === "#feedback") show();   // 블로그 등 다른 페이지의 피드백 링크(/#feedback) 진입
   document.getElementById("feedback-close").addEventListener("click", hide);
   overlay.addEventListener("click", function (e) { if (e.target === overlay) hide(); });
   document.getElementById("feedback-submit").addEventListener("click", function () {
