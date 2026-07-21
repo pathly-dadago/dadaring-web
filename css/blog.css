@@ -23,13 +23,28 @@
   margin-bottom: 40px;
 }
 .post-card {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 20px;
   background: var(--card);
   border: 1px solid var(--divider);
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 16px;
   transition: transform 0.15s, box-shadow 0.15s;
+}
+.post-card .post-body { flex: 1; min-width: 0; }
+.post-card .post-thumb {
+  flex-shrink: 0;
+  width: 132px;
+  height: 132px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--divider);
+}
+@media (max-width: 640px) {
+  .post-card { gap: 14px; padding: 18px; }
+  .post-card .post-thumb { width: 96px; height: 96px; }
 }
 .post-card:hover {
   text-decoration: none;
