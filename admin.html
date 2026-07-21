@@ -108,8 +108,17 @@
     .mkt-pre{background:var(--bg);border:1px solid var(--divider);border-radius:10px;
       padding:10px 12px;font-size:12.5px;line-height:1.7;white-space:pre-wrap;
       max-height:240px;overflow-y:auto;font-family:inherit;}
-    .mkt-imgs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
-    .mkt-imgs img{height:88px;border-radius:8px;border:1px solid var(--divider);}
+    .mkt-imgs{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;}
+    .mkt-img{display:flex;flex-direction:column;gap:4px;align-items:center;}
+    .mkt-img img{height:96px;border-radius:8px;border:1px solid var(--divider);}
+    .mkt-img-actions{display:flex;gap:4px;}
+    .mkt-img-actions a,.mkt-img-actions button{font-size:11px;padding:2px 8px;border-radius:6px;
+      border:1px solid var(--divider);background:var(--card);color:var(--tp,inherit);
+      cursor:pointer;text-decoration:none;}
+    .mkt-img-actions button.ok{background:var(--green);color:#fff;border-color:var(--green);}
+    .mkt-rich{font-weight:700;}
+    .mkt-hint{background:var(--bg);border:1px dashed var(--divider);border-radius:10px;
+      padding:8px 12px;font-size:12px;color:var(--ts);margin-top:10px;}
     .sb-mini{padding:5px 12px;border:none;border-radius:8px;font-size:12px;font-weight:600;
       cursor:pointer;color:#fff;}
     .sb-mini.sb-revoke{background:#c0574a;} .sb-mini:hover{opacity:.9;}
@@ -868,16 +877,21 @@ function renderMarketing() {
   const box = document.getElementById('mktBody');
   if (!posts.length) { box.innerHTML = '<div class="empty">등록된 원고가 없어요</div>'; return; }
 
-  const sec = (label, copyId, bodyHtml) => `
+  const sec = (label, btnsHtml, bodyHtml) => `
     <div class="mkt-sec">
-      <div class="mkt-sec-head">${label}
-        ${copyId ? `<button class="mkt-copy" onclick="mktCopy('${copyId}', this)">복사</button>` : ''}
-      </div>
+      <div class="mkt-sec-head">${label} ${btnsHtml || ''}</div>
       ${bodyHtml}
     </div>`;
+  const copyBtn = (id, label) => `<button class="mkt-copy" onclick="mktCopy('${id}', this)">${label || '복사'}</button>`;
   const pre = (id, text) => `<pre class="mkt-pre" id="${id}">${esc(text)}</pre>`;
-  const imgs = arr => `<div class="mkt-imgs">${arr.map(u =>
-    `<a href="${u}" target="_blank" rel="noopener" download><img src="${u}" alt=""></a>`).join('')}</div>`;
+  const imgs = arr => `<div class="mkt-imgs">${arr.map(u => `
+    <div class="mkt-img">
+      <img src="${u}" alt="">
+      <div class="mkt-img-actions">
+        <a href="${u}" download>저장</a>
+        <button onclick="mktCopyImage('${u}', this)">복사</button>
+      </div>
+    </div>`).join('')}</div>`;
 
   box.innerHTML = posts.map((p, i) => {
     const id = `mkt${i}`;
@@ -886,23 +900,90 @@ function renderMarketing() {
         <h3>${esc(p.title)}</h3><span class="date">${esc(p.date)}</span>
         <a href="${p.blogUrl}" target="_blank" rel="noopener">블로그 원문 ↗</a>
       </div>
-      ${sec('🟩 네이버 · 제목', id + 'nt', pre(id + 'nt', p.naver.title))}
-      ${sec('🟩 네이버 · 본문', id + 'nb', pre(id + 'nb', p.naver.body))}
-      ${sec('🟩 네이버 · 태그', id + 'ng', pre(id + 'ng', p.naver.tags))}
-      ${sec('🟩 네이버 · 첨부 이미지 (클릭해 저장)', null, imgs(p.naver.images))}
-      ${sec('🟪 인스타 · 캡션', id + 'ic', pre(id + 'ic', p.instagram.caption))}
-      ${sec('🟪 인스타 · 카드 1~' + p.instagram.images.length + ' (클릭해 저장, 순서대로 업로드)', null, imgs(p.instagram.images))}
+      <div class="mkt-hint">🟩 네이버는 <b>본문 전체 복사</b> 하나면 끝 — 에디터에 붙여넣으면 문단·굵기·이미지가 그대로 들어가요. (제목·태그는 별도 칸이라 각각 복사)</div>
+      ${sec('🟩 네이버 · 제목', copyBtn(id + 'nt'), pre(id + 'nt', p.naver.title))}
+      ${sec('🟩 네이버 · 본문',
+        `<button class="mkt-copy mkt-rich" onclick="mktCopyRich(${i}, this)">📋 본문 전체 복사 (서식·이미지 포함)</button> ${copyBtn(id + 'nb', '텍스트만')}`,
+        pre(id + 'nb', p.naver.body))}
+      ${sec('🟩 네이버 · 태그', copyBtn(id + 'ng'), pre(id + 'ng', p.naver.tags))}
+      ${sec('🟩 네이버 · 첨부 이미지', null, imgs(p.naver.images))}
+      ${sec('🟪 인스타 · 캡션', copyBtn(id + 'ic'), pre(id + 'ic', p.instagram.caption))}
+      ${sec('🟪 인스타 · 카드 1~' + p.instagram.images.length + ' (순서대로 업로드)',
+        `<button class="mkt-copy" onclick="mktSaveAll(${i}, this)">💾 전체 저장</button>`,
+        imgs(p.instagram.images))}
       ${p.threads.map((t, j) =>
-        sec(`⬛ 스레드/X · 포스트 ${j + 1}`, id + 'th' + j, pre(id + 'th' + j, t))).join('')}
+        sec(`⬛ 스레드/X · 포스트 ${j + 1}`, copyBtn(id + 'th' + j), pre(id + 'th' + j, t))).join('')}
     </div>`;
   }).join('');
+}
+
+function mktFlash(btn, text, ok = true) {
+  const orig = btn.dataset.orig || (btn.dataset.orig = btn.textContent);
+  btn.textContent = text; btn.classList.toggle('ok', ok);
+  setTimeout(() => { btn.textContent = orig; btn.classList.remove('ok'); }, 1800);
 }
 async function mktCopy(id, btn) {
   try {
     await navigator.clipboard.writeText(document.getElementById(id).textContent);
-    btn.textContent = '복사됨 ✓'; btn.classList.add('ok');
-    setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('ok'); }, 1500);
-  } catch { btn.textContent = '실패 — 수동 선택'; }
+    mktFlash(btn, '복사됨 ✓');
+  } catch { mktFlash(btn, '실패 — 다시 시도', false); }
+}
+
+// 네이버 본문 리치 복사: 문단(<p>)·소제목 굵게·이미지 마커 자리에 <img> 삽입한 HTML을
+// text/html 로 클립보드에 넣는다. 스마트에디터가 붙여넣기 시 이미지까지 자체 업로드.
+function mktBodyHtml(p) {
+  const abs = u => location.origin + u;
+  const circled = { '①': 0, '②': 1, '③': 2, '④': 3, '⑤': 4 };
+  return p.naver.body.split(/\n\n+/).map(par => {
+    const t = par.trim();
+    const m = t.match(/^\(여기에 이미지 ([①②③④⑤])/);
+    if (m) {
+      const u = p.naver.images[circled[m[1]]];
+      return u ? `<p><img src="${abs(u)}" style="max-width:100%;"></p>` : '';
+    }
+    let h = esc(t).replace(/\n/g, '<br>');
+    if (t.startsWith('■')) h = `<b>${h}</b>`;
+    return `<p>${h}</p>`;
+  }).filter(Boolean).join('<p><br></p>');
+}
+async function mktCopyRich(idx, btn) {
+  const p = (window.MARKETING_POSTS || [])[idx];
+  try {
+    const html = mktBodyHtml(p);
+    await navigator.clipboard.write([new ClipboardItem({
+      'text/html': new Blob([html], { type: 'text/html' }),
+      'text/plain': new Blob([p.naver.body], { type: 'text/plain' }),
+    })]);
+    mktFlash(btn, '복사됨 ✓ 에디터에 붙여넣으세요');
+  } catch (e) {
+    try { await navigator.clipboard.writeText(p.naver.body); mktFlash(btn, '텍스트만 복사됨'); }
+    catch { mktFlash(btn, '실패 — 다시 시도', false); }
+  }
+}
+
+// 이미지 1장을 클립보드에 (PNG 변환 — 클립보드는 PNG만 지원)
+async function mktCopyImage(url, btn) {
+  try {
+    const img = new Image();
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    c.getContext('2d').drawImage(img, 0, 0);
+    const blob = await new Promise(res => c.toBlob(res, 'image/png'));
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    mktFlash(btn, '✓');
+  } catch { mktFlash(btn, '실패', false); }
+}
+
+// 인스타 카드 전체 저장 (순차 다운로드)
+function mktSaveAll(idx, btn) {
+  const arr = (window.MARKETING_POSTS || [])[idx].instagram.images;
+  arr.forEach((u, i) => setTimeout(() => {
+    const a = document.createElement('a');
+    a.href = u; a.download = '';
+    document.body.appendChild(a); a.click(); a.remove();
+  }, i * 350));
+  mktFlash(btn, `${arr.length}장 저장 중…`);
 }
 
 // IdToken 만료(24h)만으로 로그아웃되지 않게. 재발급 실패해도 기존 토큰으로 시도.
