@@ -90,6 +90,26 @@
       padding:6px 10px;border-bottom:1px solid var(--divider);}
     .subs-table td{padding:8px 10px;border-bottom:1px solid var(--divider);}
     .subs-table .muted{color:var(--ts);padding:14px 2px;}
+    /* ── 마케팅 뷰 ── */
+    #viewMarketing{flex:1;height:100vh;overflow-y:auto;padding:18px 22px;}
+    .mkt-wrap{max-width:860px;}
+    .mkt-wrap h2{margin-bottom:6px;}
+    .mkt-post{background:var(--card);border:1px solid var(--divider);border-radius:14px;
+      padding:18px 20px;margin-top:16px;}
+    .mkt-post-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px;}
+    .mkt-post-head h3{font-size:16px;}
+    .mkt-post-head .date{color:var(--ts);font-size:12px;}
+    .mkt-post-head a{font-size:12px;}
+    .mkt-sec{margin-top:14px;}
+    .mkt-sec-head{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;margin-bottom:6px;}
+    .mkt-copy{background:var(--green);color:#fff;border:0;border-radius:8px;
+      padding:3px 10px;font-size:12px;cursor:pointer;}
+    .mkt-copy.ok{background:var(--greenD,#35A866);}
+    .mkt-pre{background:var(--bg);border:1px solid var(--divider);border-radius:10px;
+      padding:10px 12px;font-size:12.5px;line-height:1.7;white-space:pre-wrap;
+      max-height:240px;overflow-y:auto;font-family:inherit;}
+    .mkt-imgs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+    .mkt-imgs img{height:88px;border-radius:8px;border:1px solid var(--divider);}
     .sb-mini{padding:5px 12px;border:none;border-radius:8px;font-size:12px;font-weight:600;
       cursor:pointer;color:#fff;}
     .sb-mini.sb-revoke{background:#c0574a;} .sb-mini:hover{opacity:.9;}
@@ -181,6 +201,7 @@
     <button class="menu" id="menuStats" onclick="showView('stats')">📊 대시보드</button>
     <button class="menu off" id="menuFeedback" onclick="showView('feedback')">💬 피드백 <span class="cnt" id="newCnt"></span></button>
     <button class="menu off" id="menuSubs" onclick="showView('subs')">💳 구독</button>
+    <button class="menu off" id="menuMarketing" onclick="showView('marketing')">📣 마케팅</button>
     <div class="side-foot"><span id="who"></span><br><button onclick="logout()">로그아웃</button></div>
   </nav>
   <main class="content">
@@ -232,9 +253,18 @@
         <div id="subTable" class="subs-table"></div>
       </div>
     </div>
+    <div id="viewMarketing" class="hidden">
+      <div class="mkt-wrap">
+        <h2>마케팅 원고</h2>
+        <p class="subs-hint">홈페이지 블로그 글의 채널별 버전. 복사 버튼으로 그대로 붙여넣으세요.
+          새 글 발행 시 marketing-content.js 에 항목이 추가됩니다.</p>
+        <div id="mktBody"></div>
+      </div>
+    </div>
   </main>
 </div>
 
+<script src="marketing-content.js"></script>
 <script>
 const DEV = new URLSearchParams(location.search).get('env') === 'dev';
 const API = DEV ? 'https://c5gye4ook6.execute-api.ap-northeast-2.amazonaws.com/dev'
@@ -438,11 +468,14 @@ function showView(v) {
   document.getElementById('viewFeedback').classList.toggle('hidden', v !== 'feedback');
   document.getElementById('viewStats').classList.toggle('hidden', v !== 'stats');
   document.getElementById('viewSubs').classList.toggle('hidden', v !== 'subs');
+  document.getElementById('viewMarketing').classList.toggle('hidden', v !== 'marketing');
   document.getElementById('menuFeedback').classList.toggle('off', v !== 'feedback');
   document.getElementById('menuStats').classList.toggle('off', v !== 'stats');
   document.getElementById('menuSubs').classList.toggle('off', v !== 'subs');
+  document.getElementById('menuMarketing').classList.toggle('off', v !== 'marketing');
   if (v === 'stats') loadStats();
   if (v === 'subs') subLoadList();
+  if (v === 'marketing') renderMarketing();
 }
 
 // 우상단 새로고침 — 페이지 리로드 없이(세션 유지) 현재 화면 데이터를 다시 불러온다.
@@ -826,6 +859,52 @@ async function enter() {
 }
 
 // 진입 시 리프레시 토큰(최대 365일)으로 IdToken 을 선제 재발급해 세션을 이어간다 —
+// ── 마케팅 원고(정적 데이터, marketing-content.js) ──────────────
+let mktRendered = false;
+function renderMarketing() {
+  if (mktRendered) return;   // 정적 데이터라 1회만 렌더
+  mktRendered = true;
+  const posts = window.MARKETING_POSTS || [];
+  const box = document.getElementById('mktBody');
+  if (!posts.length) { box.innerHTML = '<div class="empty">등록된 원고가 없어요</div>'; return; }
+
+  const sec = (label, copyId, bodyHtml) => `
+    <div class="mkt-sec">
+      <div class="mkt-sec-head">${label}
+        ${copyId ? `<button class="mkt-copy" onclick="mktCopy('${copyId}', this)">복사</button>` : ''}
+      </div>
+      ${bodyHtml}
+    </div>`;
+  const pre = (id, text) => `<pre class="mkt-pre" id="${id}">${esc(text)}</pre>`;
+  const imgs = arr => `<div class="mkt-imgs">${arr.map(u =>
+    `<a href="${u}" target="_blank" rel="noopener" download><img src="${u}" alt=""></a>`).join('')}</div>`;
+
+  box.innerHTML = posts.map((p, i) => {
+    const id = `mkt${i}`;
+    return `<div class="mkt-post">
+      <div class="mkt-post-head">
+        <h3>${esc(p.title)}</h3><span class="date">${esc(p.date)}</span>
+        <a href="${p.blogUrl}" target="_blank" rel="noopener">블로그 원문 ↗</a>
+      </div>
+      ${sec('🟩 네이버 · 제목', id + 'nt', pre(id + 'nt', p.naver.title))}
+      ${sec('🟩 네이버 · 본문', id + 'nb', pre(id + 'nb', p.naver.body))}
+      ${sec('🟩 네이버 · 태그', id + 'ng', pre(id + 'ng', p.naver.tags))}
+      ${sec('🟩 네이버 · 첨부 이미지 (클릭해 저장)', null, imgs(p.naver.images))}
+      ${sec('🟪 인스타 · 캡션', id + 'ic', pre(id + 'ic', p.instagram.caption))}
+      ${sec('🟪 인스타 · 카드 1~' + p.instagram.images.length + ' (클릭해 저장, 순서대로 업로드)', null, imgs(p.instagram.images))}
+      ${p.threads.map((t, j) =>
+        sec(`⬛ 스레드/X · 포스트 ${j + 1}`, id + 'th' + j, pre(id + 'th' + j, t))).join('')}
+    </div>`;
+  }).join('');
+}
+async function mktCopy(id, btn) {
+  try {
+    await navigator.clipboard.writeText(document.getElementById(id).textContent);
+    btn.textContent = '복사됨 ✓'; btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('ok'); }, 1500);
+  } catch { btn.textContent = '실패 — 수동 선택'; }
+}
+
 // IdToken 만료(24h)만으로 로그아웃되지 않게. 재발급 실패해도 기존 토큰으로 시도.
 (async () => {
   if (localStorage.getItem('adminRefreshToken')) await tryRefresh();
