@@ -7,4 +7,4 @@ Disallow: /invite.html
 Disallow: /delete-account
 Disallow: /delete-account.html
 
-Sitemap: https://dadaring.com/sitemap.xml
+Sitemap: https://www.dadaring.com/sitemap.xml
