@@ -60,7 +60,7 @@ a:hover { text-decoration: underline; }
   letter-spacing: -0.5px;
 }
 .nav-logo:hover { text-decoration: none; }
-.nav-links { display: flex; gap: 28px; }
+.nav-links { display: flex; align-items: center; gap: 28px; }
 .nav-links a {
   font-size: 14px;
   font-weight: 500;
