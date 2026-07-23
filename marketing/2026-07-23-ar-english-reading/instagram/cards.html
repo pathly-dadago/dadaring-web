@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<!-- 인스타 카드뉴스 렌더 소스 (1080x1350, 4:5). #card1~#card6 해시로 한 장씩 표시.
+     캡처: chrome headless -\-window-size=1080,1350 -\-screenshot=cardN.png cards.html#cardN -->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+  :root {
+    --primary: #43C67A; --primary-dark: #35A866; --surface: #EAF8F0;
+    --bg: #F5FFF9; --ink: #2D3436; --sub: #5E7468;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard', sans-serif; word-break: keep-all; }
+  .card { display: none; width: 1080px; height: 1350px; position: relative; overflow: hidden;
+          background: var(--bg); flex-direction: column; padding: 90px 84px; }
+  .card:target { display: flex; }
+  .brand { position: absolute; top: 64px; right: 84px; font-size: 34px; font-weight: 800;
+           color: var(--primary-dark); letter-spacing: -1px; }
+  .pageno { position: absolute; bottom: 56px; right: 84px; font-size: 26px; color: #B8C5D0; font-weight: 600; }
+  .kicker { font-size: 34px; font-weight: 700; color: var(--primary-dark); margin-bottom: 28px; }
+  h1 { font-size: 82px; font-weight: 800; line-height: 1.28; letter-spacing: -2px; color: var(--ink); }
+  h1 .hl { color: var(--primary-dark); }
+  .sub { font-size: 40px; line-height: 1.6; color: var(--sub); margin-top: 40px; font-weight: 500; }
+  .center { justify-content: center; }
+  .paper { background: #fff; border: 3px solid var(--surface); border-radius: 32px;
+           padding: 52px 56px; box-shadow: 0 16px 40px rgba(31,51,41,.08);
+           font-size: 52px; font-weight: 800; color: var(--ink); line-height: 1.7;
+           width: fit-content; letter-spacing: 1px; }
+  .paper small { display: block; font-size: 30px; color: #B8C5D0; font-weight: 600; letter-spacing: 0; margin-bottom: 18px; }
+  .shot-wrap { flex: 1; display: flex; align-items: center; justify-content: center; margin-top: 48px; }
+  .shot-wrap img { border-radius: 36px; border: 2px solid #D8F0E3;
+                   box-shadow: 0 24px 64px rgba(31,51,41,.14); }
+  .rows { margin-top: 64px; display: flex; flex-direction: column; gap: 36px; }
+  .row { background: #fff; border: 2px solid #D8F0E3; border-radius: 32px; padding: 44px 48px;
+         display: flex; gap: 36px; align-items: flex-start;
+         box-shadow: 0 12px 32px rgba(31,51,41,.06); }
+  .row .emoji { font-size: 64px; line-height: 1.1; }
+  .row h3 { font-size: 44px; font-weight: 800; color: var(--ink); margin-bottom: 10px; }
+  .row p { font-size: 34px; line-height: 1.55; color: var(--sub); }
+  .cta-box { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+             border-radius: 48px; padding: 96px 72px; text-align: center; margin-top: 72px; }
+  .cta-box h2 { font-size: 72px; font-weight: 800; color: #fff; letter-spacing: -1px; }
+  .cta-box p { font-size: 40px; color: rgba(255,255,255,.9); margin-top: 24px; }
+  .stores { display: flex; gap: 28px; justify-content: center; margin-top: 56px; }
+  .stores span { background: #2D3436; color: #fff; font-size: 36px; font-weight: 700;
+                 padding: 28px 48px; border-radius: 24px; }
+</style>
+</head>
+<body>
+
+<!-- 1: 훅 -->
+<section class="card center" id="card1">
+  <div class="brand">DADAring</div>
+  <div class="paper"><small>영어학원에서 받아온 성적표</small>SS 512 · GE 3.4<br>ZPD 3.5~5.5 …❓</div>
+  <h1 style="margin-top:72px;">무슨 뜻인지 모른 채<br><span class="hl">서랍에 쌓이는</span><br>AR 성적표</h1>
+  <p class="sub">물어보긴 애매하고, 지난번과 비교하려면<br>파일철을 뒤져야 하고.</p>
+  <div class="pageno">1 / 6</div>
+</section>
+
+<!-- 2: 지표 정리 -->
+<section class="card" id="card2">
+  <div class="brand">DADAring</div>
+  <div class="kicker">Star Reading 지표 3초 정리</div>
+  <h1>이것만 알면<br><span class="hl">성적표가 읽혀요</span></h1>
+  <div class="rows">
+    <div class="row"><div class="emoji">📏</div><div><h3>SS 척도점수</h3><p>학년이 올라도 같은 잣대 — 성장 추적의 기준</p></div></div>
+    <div class="row"><div class="emoji">🎓</div><div><h3>GE 학년 환산</h3><p>GE 3.4 = 미국 3학년 4개월 차 수준</p></div></div>
+    <div class="row"><div class="emoji">📚</div><div><h3>ZPD 권장 레벨</h3><p>아이에게 딱 맞는 책 레벨 범위 — 원서 고를 때 바로 활용</p></div></div>
+  </div>
+  <div class="pageno">2 / 6</div>
+</section>
+
+<!-- 3: 해법 -->
+<section class="card" id="card3">
+  <div class="brand">DADAring</div>
+  <div class="kicker">다다링 AR 영어독서</div>
+  <h1>사진 한 장 찍으면<br><span class="hl">성장 그래프</span>가 돼요</h1>
+  <div class="shot-wrap"><img src="../../../images/ar-graph-real-680.jpg" alt="" style="width:540px;"></div>
+  <div class="pageno">3 / 6</div>
+</section>
+
+<!-- 4: 기능 -->
+<section class="card" id="card4">
+  <div class="brand">DADAring</div>
+  <div class="kicker">찍기만 하면, 나머지는 AI가</div>
+  <h1>정리 끝,<br><span class="hl">해석까지</span></h1>
+  <div class="rows">
+    <div class="row"><div class="emoji">📸</div><div><h3>자동 추출</h3><p>SS·GE·ZPD·영역별 성취도를 AI가 알아서 정리</p></div></div>
+    <div class="row"><div class="emoji">📈</div><div><h3>성장 그래프 + 또래 비교</h3><p>쌓일수록 보이는 추이, 같은 나이대 평균과 비교</p></div></div>
+    <div class="row"><div class="emoji">🤖</div><div><h3>AI 분석 + 추천 도서</h3><p>강점·보완점·학습 가이드에 ZPD 맞춤 원서까지</p></div></div>
+  </div>
+  <div class="pageno">4 / 6</div>
+</section>
+
+<!-- 5: 팁 -->
+<section class="card center" id="card5">
+  <div class="brand">DADAring</div>
+  <h1>서랍 속 성적표,<br><span class="hl">몰아서 찍어보세요</span></h1>
+  <p class="sub">검사일 기준으로 자동 정렬되니까<br><br><strong style="color:var(--primary-dark);">지난 1~2년의 성장 곡선</strong>이<br>그 자리에서 바로 완성됩니다.</p>
+  <div class="pageno">5 / 6</div>
+</section>
+
+<!-- 6: CTA -->
+<section class="card center" id="card6">
+  <div class="brand">DADAring</div>
+  <h1>아이의 영어 성장,<br><span class="hl">그래프로 확인</span></h1>
+  <p class="sub">AR 기록 · 학원 일정 · 위젯 · 가족 공유 · 학원비</p>
+  <div class="cta-box">
+    <h2>다다링, 무료로 시작</h2>
+    <p>스토어에서 "다다링"을 검색하세요</p>
+    <div class="stores"><span>🍎 App Store</span><span>🤖 Google Play</span></div>
+  </div>
+  <div class="pageno">6 / 6</div>
+</section>
+
+</body>
+</html>

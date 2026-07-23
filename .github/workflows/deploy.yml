@@ -24,7 +24,7 @@ jobs:
 
       - name: Sync to S3
         # Allowlist sync: new files/dirs are private by default — add an --include to publish a new content type.
-        run: aws s3 sync . s3://dadaring-web-prod --exclude "*" --include "*.html" --include "css/*" --include "images/*" --include ".well-known/*" --include "robots.txt" --include "sitemap.xml" --include "marketing-content.js" --exclude "docs/*" --delete
+        run: aws s3 sync . s3://dadaring-web-prod --exclude "*" --include "*.html" --include "css/*" --include "images/*" --include ".well-known/*" --include "robots.txt" --include "sitemap.xml" --include "marketing-content.js" --exclude "docs/*" --exclude "marketing/*" --delete
 
       - name: Fix apple-app-site-association content-type
         # Apple requires application/json. S3 defaults to application/octet-stream
