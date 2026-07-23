@@ -29,7 +29,7 @@
       if (code) {
         playUrl += '&referrer=' + encodeURIComponent('invite_code=' + code);
       }
-      var appleUrl = 'https://apps.apple.com/app/id' + appStoreId;
+      var appleUrl = 'https://apps.apple.com/kr/app/id' + appStoreId;
 
       // iOS fallback: clipboard copy (deferred deep linking via pasteboard inspection on first launch).
       if (isIOS && code && navigator.clipboard && navigator.clipboard.writeText) {
@@ -62,7 +62,7 @@
   </p>
 
   <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 32px;">
-    <a href="https://apps.apple.com/app/id6769691549"
+    <a href="https://apps.apple.com/kr/app/id6769691549"
        class="hero-cta"
        style="background: #000; text-decoration: none;">
       🍎 App Store
