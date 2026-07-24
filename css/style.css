@@ -541,7 +541,6 @@ a:hover { text-decoration: underline; }
 
 /* ── Responsive ── */
 @media (max-width: 640px) {
-  .nav-links { display: none; }
   .feature-grid { grid-template-columns: 1fr; }
   .stats-inner { flex-direction: column; }
   .footer-inner { flex-direction: column; }
@@ -561,8 +560,7 @@ a:hover { text-decoration: underline; }
 .fb-close { position: absolute; top: 10px; right: 14px; background: none; border: 0; font-size: 22px; color: #8FA39A; cursor: pointer; }
 .fb-status { min-height: 18px; margin: 10px 0 0; font-size: 13px; color: #35A866; text-align: center; }
 
-/* 모바일에서도 피드백 버튼은 유지 (다른 nav 링크만 숨김) */
+/* 모바일 — 소개·블로그·피드백 모두 유지, 간격만 축소 */
 @media (max-width: 640px) {
-  .nav-links { display: flex; }
-  .nav-links a:not(.nav-feedback) { display: none; }
+  .nav-links { gap: 14px; }
 }

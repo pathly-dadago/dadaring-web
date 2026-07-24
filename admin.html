@@ -193,7 +193,9 @@
       .scard{padding:12px;}
       .chart-2col{grid-template-columns:1fr;gap:0;}
       .chart-2col .scard{margin-bottom:14px;}
-      .topbar{display:none;} /* 모바일은 현재 레이아웃 유지 */
+      /* 모바일 — 상단 고정 대신 얇은 우측 정렬 행으로 (새로고침·홈페이지 유지) */
+      .topbar{position:static;justify-content:flex-end;padding:8px 12px 0;}
+      .tb-btn{padding:5px 10px;font-size:12px;}
       .tier{display:block;overflow-x:auto;white-space:nowrap;font-size:12px;}
       .send{width:100%;float:none;}
       textarea{font-size:16px;} /* iOS 자동 줌 방지 */
