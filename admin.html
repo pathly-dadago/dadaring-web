@@ -53,6 +53,9 @@
     .dcard{background:var(--card);border:1px solid var(--divider);border-radius:14px;padding:20px;max-width:720px;}
     .dmeta{font-size:12px;color:var(--ts);margin-bottom:12px;}
     .dmsg{font-size:14.5px;line-height:1.65;white-space:pre-wrap;margin-bottom:18px;}
+    .dimgs{display:flex;gap:8px;flex-wrap:wrap;margin:-6px 0 18px;}
+    .dimgs img{width:96px;height:96px;object-fit:cover;border-radius:10px;
+      border:1px solid var(--divider);display:block;}
     .rep-h{font-size:12.5px;font-weight:800;color:var(--greenD);border-top:1px dashed var(--divider);padding-top:14px;margin-bottom:8px;}
     .rep{background:var(--surface);border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:6px;white-space:pre-wrap;}
     .rep .rdt{display:block;font-size:11px;color:var(--ts);margin-top:4px;}
@@ -415,6 +418,8 @@ function detailHtml(f) {
     <div class="dcard">
       <div class="dmeta">${esc(f.ownerEmail)}${f.client ? ' · ' + esc(f.client) : ''} · ${fmt(f.createdAt)}</div>
       <div class="dmsg">${esc(f.message)}</div>
+      ${(f.imageUrls || []).length ? `<div class="dimgs">${f.imageUrls.map(u =>
+        `<a href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="첨부 이미지"></a>`).join('')}</div>` : ''}
       <div class="rep-h">💬 답글 이력 (${f.replies.length})</div>
       ${f.replies.map(r => `<div class="rep">${esc(r.message)}<span class="rdt">${fmt(r.createdAt)}</span></div>`).join('')}
       <textarea id="replyText" rows="4" placeholder="답글을 입력하면 사용자 앱 알림으로 전송돼요"></textarea>
@@ -433,7 +438,7 @@ function renderList() {
           ${f.status === 'new' ? '● 신규' : '✓ 답변완료'}</span>
         <span class="dt">${fmt(f.createdAt)}</span>
       </div>
-      <div class="msg">${esc(f.message)}</div>
+      <div class="msg">${(f.imageUrls || []).length ? '📷 ' : ''}${esc(f.message)}</div>
     </div>
     ${isMobile() && f.feedbackId === selectedId
         ? `<div class="fb-inline">${detailHtml(f)}</div>` : ''}`).join('');
