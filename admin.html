@@ -291,7 +291,19 @@
   </main>
 </div>
 
-<script src="marketing-content.js"></script>
+<!-- 캐시버스팅 동적 로드 — 관리자는 항상 최신 원고를 봐야 하므로 브라우저
+     캐시(cache-control 없음)를 우회한다. 로드 후 마케팅 탭이 열려 있으면 재렌더. -->
+<script>
+(function () {
+  var s = document.createElement('script');
+  s.src = 'marketing-content.js?t=' + Date.now();
+  s.onload = function () {
+    var v = document.getElementById('viewMarketing');
+    if (v && !v.classList.contains('hidden') && typeof renderMarketing === 'function') renderMarketing();
+  };
+  document.head.appendChild(s);
+})();
+</script>
 <script>
 const DEV = new URLSearchParams(location.search).get('env') === 'dev';
 const API = DEV ? 'https://c5gye4ook6.execute-api.ap-northeast-2.amazonaws.com/dev'
@@ -891,8 +903,9 @@ async function enter() {
 // ── 마케팅 원고(정적 데이터, marketing-content.js) ──────────────
 // 목록 → 클릭 → 상세 구조. renderMarketing()=목록, mktOpen(i)=상세.
 function renderMarketing() {
-  const posts = window.MARKETING_POSTS || [];
   const box = document.getElementById('mktBody');
+  if (!window.MARKETING_POSTS) { box.innerHTML = '<div class="empty">원고를 불러오는 중…</div>'; return; }
+  const posts = window.MARKETING_POSTS;
   if (!posts.length) { box.innerHTML = '<div class="empty">등록된 원고가 없어요</div>'; return; }
   box.innerHTML = `
     <div class="mkt-hint">📲 표준 앱 링크(기기 자동 구분): <b id="mktapplink">https://www.dadaring.com/app</b>
