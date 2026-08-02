@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<!-- 인스타 카드뉴스 렌더 소스 (1080x1350, 4:5). #card1~#card6 해시로 한 장씩 표시.
+     캡처: chrome headless -\-window-size=1080,1350 -\-screenshot=cardN.png cards.html#cardN -->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+  :root {
+    --primary: #43C67A; --primary-dark: #35A866; --surface: #EAF8F0;
+    --bg: #F5FFF9; --ink: #2D3436; --sub: #5E7468;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard', sans-serif; word-break: keep-all; }
+  .card { display: none; width: 1080px; height: 1350px; position: relative; overflow: hidden;
+          background: var(--bg); flex-direction: column; padding: 90px 84px; }
+  .card:target { display: flex; }
+  .brand { position: absolute; top: 64px; right: 84px; font-size: 34px; font-weight: 800;
+           color: var(--primary-dark); letter-spacing: -1px; }
+  .pageno { position: absolute; bottom: 56px; right: 84px; font-size: 26px; color: #B8C5D0; font-weight: 600; }
+  .kicker { font-size: 34px; font-weight: 700; color: var(--primary-dark); margin-bottom: 28px; }
+  h1 { font-size: 82px; font-weight: 800; line-height: 1.28; letter-spacing: -2px; color: var(--ink); }
+  h1 .hl { color: var(--primary-dark); }
+  .sub { font-size: 40px; line-height: 1.6; color: var(--sub); margin-top: 40px; font-weight: 500; }
+  .center { justify-content: center; }
+  .paper { background: #fff; border: 3px solid var(--surface); border-radius: 32px;
+           padding: 44px 50px; box-shadow: 0 16px 40px rgba(31,51,41,.08);
+           font-size: 38px; font-weight: 600; color: var(--ink); line-height: 1.85;
+           width: fit-content; }
+  .paper small { display: block; font-size: 30px; color: #B8C5D0; font-weight: 700; letter-spacing: 0; margin-bottom: 16px; }
+  .paper .x { color: #C9A227; }
+  .shot-wrap { flex: 1; display: flex; align-items: center; justify-content: center; margin-top: 48px; }
+  .shot-wrap img { border-radius: 36px; border: 2px solid #D8F0E3;
+                   box-shadow: 0 24px 64px rgba(31,51,41,.14); }
+  .rows { margin-top: 64px; display: flex; flex-direction: column; gap: 36px; }
+  .row { background: #fff; border: 2px solid #D8F0E3; border-radius: 32px; padding: 44px 48px;
+         display: flex; gap: 36px; align-items: flex-start;
+         box-shadow: 0 12px 32px rgba(31,51,41,.06); }
+  .row .emoji { font-size: 64px; line-height: 1.1; }
+  .row h3 { font-size: 44px; font-weight: 800; color: var(--ink); margin-bottom: 10px; }
+  .row p { font-size: 34px; line-height: 1.55; color: var(--sub); }
+  .cta-box { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+             border-radius: 48px; padding: 96px 72px; text-align: center; margin-top: 72px; }
+  .cta-box h2 { font-size: 72px; font-weight: 800; color: #fff; letter-spacing: -1px; }
+  .cta-box p { font-size: 40px; color: rgba(255,255,255,.9); margin-top: 24px; }
+  .stores { display: flex; gap: 28px; justify-content: center; margin-top: 56px; }
+  .stores span { background: #2D3436; color: #fff; font-size: 36px; font-weight: 700;
+                 padding: 28px 48px; border-radius: 24px; }
+</style>
+</head>
+<body>
+
+<!-- 1: 훅 -->
+<section class="card center" id="card1">
+  <div class="brand">DADAring</div>
+  <div class="paper"><small>가방 속 가정통신문</small>· 25일 물놀이 준비물<br>· 24일까지 상담 신청<br>· 원비 자동이체 25일 …<span class="x">😵‍💫</span></div>
+  <h1 style="margin-top:72px;">읽을 땐 챙긴다 하고<br><span class="hl">며칠 뒤엔</span><br>"언제까지였더라?"</h1>
+  <p class="sub">캘린더에 옮겨 적기도 전에<br>통신문은 다시 가방 속으로.</p>
+  <div class="pageno">1 / 6</div>
+</section>
+
+<!-- 2: 해법 -->
+<section class="card" id="card2">
+  <div class="brand">DADAring</div>
+  <div class="kicker">다다링 알림장</div>
+  <h1>사진 한 장 찍으면<br><span class="hl">할 일이 튀어나와요</span></h1>
+  <div class="shot-wrap"><img src="../../../images/notice-todos-real-680.jpg" alt="" style="width:560px;"></div>
+  <div class="pageno">2 / 6</div>
+</section>
+
+<!-- 3: 사람처럼 읽는다 -->
+<section class="card" id="card3">
+  <div class="brand">DADAring</div>
+  <div class="kicker">글자만 옮기는 게 아니에요</div>
+  <h1>사람처럼<br><span class="hl">읽어냅니다</span></h1>
+  <div class="rows">
+    <div class="row"><div class="emoji">📅</div><div><h3>날짜 계산</h3><p>"다음 주 수요일"도 실제 날짜로 바꿔 마감 있는 할 일로</p></div></div>
+    <div class="row"><div class="emoji">🎒</div><div><h3>준비물 챙기기</h3><p>수영복·수건·여벌 옷을 그날 할 일에 함께 적어둬요</p></div></div>
+    <div class="row"><div class="emoji">🔗</div><div><h3>신청 링크 인식</h3><p>상담·설문 주소는 탭 한 번에 여는 링크로</p></div></div>
+  </div>
+  <div class="pageno">3 / 6</div>
+</section>
+
+<!-- 4: 어디에나 함께 -->
+<section class="card" id="card4">
+  <div class="brand">DADAring</div>
+  <div class="kicker">저장하면 끝</div>
+  <h1>할 일 탭·홈·위젯에<br><span class="hl">그대로 떠요</span></h1>
+  <div class="rows">
+    <div class="row"><div class="emoji">✅</div><div><h3>할 일 목록으로</h3><p>맞는 것만 체크해 저장하면 그대로 등록</p></div></div>
+    <div class="row"><div class="emoji">🏠</div><div><h3>홈·위젯에 함께</h3><p>아이 일정 보던 그 자리에서 바로 확인</p></div></div>
+    <div class="row"><div class="emoji">👨‍👩‍👧</div><div><h3>가족과 공유</h3><p>"이번 주 준비물 뭐였지?"를 온 가족이 같은 화면에서</p></div></div>
+  </div>
+  <div class="pageno">4 / 6</div>
+</section>
+
+<!-- 5: 팁 -->
+<section class="card center" id="card5">
+  <div class="brand">DADAring</div>
+  <h1>여러 장이어도,<br><span class="hl">한 번에 첨부하세요</span></h1>
+  <p class="sub">앞뒤로 인쇄돼 있어도 괜찮아요.<br><br>AI가 전부 읽어 <strong style="color:var(--primary-dark);">중복은 정리하고<br>할 일만 모아줍니다.</strong><br>원본 사진도 알림장에 계속 보관돼요.</p>
+  <div class="pageno">5 / 6</div>
+</section>
+
+<!-- 6: CTA -->
+<section class="card center" id="card6">
+  <div class="brand">DADAring</div>
+  <h1>가방 속 통신문이,<br><span class="hl">할 일 목록으로</span></h1>
+  <p class="sub">알림장 · 학원 일정 · 위젯 · AR 영어독서 · 학원비</p>
+  <div class="cta-box">
+    <h2>다다링, 무료로 시작</h2>
+    <p>스토어에서 "다다링"을 검색하세요</p>
+    <div class="stores"><span>🍎 App Store</span><span>🤖 Google Play</span></div>
+  </div>
+  <div class="pageno">6 / 6</div>
+</section>
+
+</body>
+</html>
