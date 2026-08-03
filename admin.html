@@ -326,6 +326,7 @@
           <b>종류</b>(쿠팡/광고)를 고르고, 📷 사진 또는 이모지·제목·설명·링크를 넣어 <b>저장</b>하면 앱에 바로 반영됩니다.
           순서는 ↑↓, 노출은 체크박스로. 위치별로 노출 배너가 하나도 없으면 그 화면에선 광고 카드가 아예 안 보여요.
           <br><b>노출 기간</b>은 시작일·종료일을 넣으면 그 기간(당일 포함)에만 앱에 나와요. 비우면 그 방향은 제한 없음.
+          목록은 <b>종료일이 먼 순서</b>로 정렬돼요(종료일 없는 배너가 맨 위, 곧 끝나는 배너가 아래).
           <br><b>문구</b>는 카드 하단 고지예요. 종류를 바꾸면 기본값이 채워지고(쿠팡=<b>쿠팡 파트너스 · 수수료를
           제공받는 광고입니다</b>, 광고=비움), 직접 수정할 수 있어요. 비우면 칩(쿠팡/AD)만 보여요.</p>
         <div id="cpList"></div>
@@ -976,10 +977,21 @@ function renderMarketing() {
 // ── 쿠팡 배너 관리 ──
 let cpBanners = [];
 const CP_COUPANG_DISC = '쿠팡 파트너스 · 수수료를 제공받는 광고입니다';
+/// 종료일이 먼(오래 남은) 배너가 위로 — 무제한(종료일 없음)이 최상단, 곧 끝나는 광고가 아래.
+/// sort 는 안정 정렬이라 종료일이 같으면 기존(=앱 노출) 순서를 유지한다.
+function cpSortByEnd(list) {
+  return list.slice().sort((a, b) => {
+    const ae = String(a.endDate || '').trim(), be = String(b.endDate || '').trim();
+    if (!ae && !be) return 0;
+    if (!ae) return -1;   // 무제한이 위로
+    if (!be) return 1;
+    return be.localeCompare(ae);  // 늦게 끝나는 것이 위로
+  });
+}
 async function cpLoad() {
   try {
     const { banners } = await api('/coupang/admin/banners');
-    cpBanners = banners || [];
+    cpBanners = cpSortByEnd(banners || []);
   } catch (e) { cpBanners = []; }
   cpRender();
 }
@@ -1071,7 +1083,7 @@ async function cpSave() {
     const payload = cpBanners.map(({ _preview, imageUrl, ...b }) => b);
     const { banners } = await api('/coupang/admin/banners',
       { method: 'PUT', body: JSON.stringify({ banners: payload }) });
-    cpBanners = banners || [];
+    cpBanners = cpSortByEnd(banners || []);
     cpRender();
     msg.style.color = 'var(--green)'; msg.textContent = '저장됐어요 ✓';
     setTimeout(() => { msg.textContent = ''; }, 2500);
