@@ -107,6 +107,10 @@
     .cp-row .cp-title{width:150px;}
     .cp-row .cp-desc{flex:1;min-width:150px;}
     .cp-row .cp-link{flex:1;min-width:200px;font-size:11.5px;}
+    .cp-row .cp-img{flex:1;min-width:170px;font-size:11.5px;}
+    .cp-row .cp-type{border:1px solid var(--divider);border-radius:7px;padding:6px 6px;font-size:12.5px;background:var(--card);}
+    .cp-row .cp-disc{flex-basis:100%;font-size:11px;color:var(--ts);padding:2px 2px 0;}
+    .cp-row .cp-disc b{color:var(--greenD);}
     .cp-row input[type=color]{width:34px;height:30px;border:1px solid var(--divider);border-radius:7px;padding:0;background:none;}
     .cp-row label{font-size:12px;color:var(--ts);display:flex;align-items:center;gap:3px;}
     .cp-row .cp-mv{background:none;border:1px solid var(--divider);border-radius:6px;
@@ -247,7 +251,7 @@
     <button class="menu off" id="menuFeedback" onclick="showView('feedback')">💬 피드백 <span class="cnt" id="newCnt"></span></button>
     <button class="menu off" id="menuSubs" onclick="showView('subs')">💳 구독</button>
     <button class="menu off" id="menuMarketing" onclick="showView('marketing')">📣 마케팅</button>
-    <button class="menu off" id="menuCoupang" onclick="showView('coupang')">🛒 쿠팡 배너</button>
+    <button class="menu off" id="menuCoupang" onclick="showView('coupang')">📢 광고</button>
     <div class="side-foot"><span id="who"></span><br><button onclick="logout()">로그아웃</button></div>
   </nav>
   <main class="content">
@@ -310,7 +314,7 @@
 
     <div id="viewCoupang" class="hidden">
       <div class="cp-wrap">
-        <h2>🛒 쿠팡 배너</h2>
+        <h2>📢 광고</h2>
         <p class="subs-hint">다다앱 최상단에 한 개씩 자동 회전하는 쿠팡 파트너스 배너예요.
           이모지·색·문구·링크를 넣고 <b>저장</b>하면 앱에 바로 반영됩니다. 순서는 ↑↓, 노출은 체크박스로.
           <br>필수 문구(<b>쿠팡 파트너스 · 수수료를 제공받는 광고입니다</b>)는 앱이 자동으로 넣어요.</p>
@@ -972,23 +976,35 @@ function cpEsc(s) { return String(s == null ? '' : s).replace(/"/g, '&quot;').re
 function cpRender() {
   const box = document.getElementById('cpList');
   if (!cpBanners.length) { box.innerHTML = '<div class="empty">배너가 없어요. “+ 배너 추가”로 시작하세요.</div>'; return; }
-  box.innerHTML = cpBanners.map((b, i) => `
+  box.innerHTML = cpBanners.map((b, i) => {
+    const isAd = b.adType === 'ad';
+    const disc = isAd ? '광고' : '쿠팡 파트너스 · 수수료를 제공받는 광고입니다';
+    return `
     <div class="cp-row">
-      <input type="text" class="cp-emoji" value="${cpEsc(b.emoji)}" oninput="cpSet(${i},'emoji',this.value)" placeholder="🎁">
-      <input type="color" value="${/^#[0-9a-fA-F]{6}$/.test(b.chipColor) ? b.chipColor : '#FBEBD3'}" oninput="cpSet(${i},'chipColor',this.value)" title="아이콘칩 배경색">
-      <input type="text" class="cp-title" value="${cpEsc(b.title)}" oninput="cpSet(${i},'title',this.value)" placeholder="제목 (예: 골드박스)">
+      <select class="cp-type" onchange="cpSet(${i},'adType',this.value)">
+        <option value="coupang" ${isAd ? '' : 'selected'}>쿠팡</option>
+        <option value="ad" ${isAd ? 'selected' : ''}>광고</option>
+      </select>
+      <input type="text" class="cp-emoji" value="${cpEsc(b.emoji)}" oninput="cpSet(${i},'emoji',this.value)" placeholder="🎁" title="이미지 없을 때 표시할 이모지">
+      <input type="color" value="${/^#[0-9a-fA-F]{6}$/.test(b.chipColor) ? b.chipColor : '#FBEBD3'}" oninput="cpSet(${i},'chipColor',this.value)" title="이모지칩 배경색">
+      <input type="text" class="cp-title" value="${cpEsc(b.title)}" oninput="cpSet(${i},'title',this.value)" placeholder="제목">
       <input type="text" class="cp-desc" value="${cpEsc(b.description)}" oninput="cpSet(${i},'description',this.value)" placeholder="한 줄 설명">
+      <input type="text" class="cp-img" value="${cpEsc(b.imageUrl)}" oninput="cpSet(${i},'imageUrl',this.value)" placeholder="이미지 URL (비우면 이모지)">
       <input type="text" class="cp-link" value="${cpEsc(b.linkUrl)}" oninput="cpSet(${i},'linkUrl',this.value)" placeholder="https://link.coupang.com/a/…">
       <label><input type="checkbox" ${b.active ? 'checked' : ''} onchange="cpSet(${i},'active',this.checked)">노출</label>
       <button class="cp-mv" onclick="cpMove(${i},-1)" title="위로">↑</button>
       <button class="cp-mv" onclick="cpMove(${i},1)" title="아래로">↓</button>
       <button class="cp-del" onclick="cpDel(${i})" title="삭제">🗑</button>
-    </div>`).join('');
+      <div class="cp-disc">앱 표시 문구: <b>${disc}</b></div>
+    </div>`; }).join('');
 }
-function cpSet(i, k, v) { cpBanners[i][k] = v; }
+function cpSet(i, k, v) {
+  cpBanners[i][k] = v;
+  if (k === 'adType') cpRender();   // 타입 바뀌면 문구 미리보기 갱신
+}
 function cpAdd() {
   cpBanners.push({ id: 'b' + Date.now(), emoji: '🎁', chipColor: '#FBEBD3',
-    title: '', description: '', linkUrl: '', active: true });
+    title: '', description: '', imageUrl: '', linkUrl: '', active: true, adType: 'coupang' });
   cpRender();
 }
 function cpDel(i) { cpBanners.splice(i, 1); cpRender(); }
