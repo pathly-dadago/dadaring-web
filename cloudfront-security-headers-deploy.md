@@ -3,6 +3,11 @@
 `dadaring.com` 응답에 HSTS, X-Content-Type-Options, Referrer-Policy, X-Frame-Options, CSP 5종을 강제 주입.
 
 > 2026-07-07: 관리자 페이지(admin.html)용으로 connect-src 에 cognito-idp + API GW(prod/dev) 추가.
+>
+> 2026-08-03: 광고 배너 이미지 업로드용으로 uploads 버킷(dev/prod) 도메인을 **connect-src**(presigned PUT)
+> 와 **img-src**(presigned GET 썸네일)에 추가. 없으면 브라우저가 S3 요청을 CSP 로 차단해 업로드가 실패한다.
+> ⚠️ update-response-headers-policy 는 get 응답에 들어있는 **빈 `XSSProtection: {}` 블록을 거부**하므로
+> (`Missing required parameter ... Override/Protection`), 정책 본문을 만들 때 그 키는 지우고 보낼 것.
 
 - **Policy 이름:** `dadaring-web-security-headers`
 - **Policy ID:** `edc7b320-d4fe-4530-875a-4f878e84282f`
@@ -34,7 +39,7 @@ cat > /tmp/response-headers-policy.json <<'EOF'
     },
     "ContentSecurityPolicy": {
       "Override": true,
-      "ContentSecurityPolicy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src 'self' https://cdn.jsdelivr.net data:; img-src 'self' data:; connect-src 'self' https://vk5y4us4uxvs6lebtogalyloua0ttbte.lambda-url.ap-northeast-2.on.aws https://cognito-idp.ap-northeast-2.amazonaws.com https://dnbl3bo4eg.execute-api.ap-northeast-2.amazonaws.com https://c5gye4ook6.execute-api.ap-northeast-2.amazonaws.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+      "ContentSecurityPolicy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src 'self' https://cdn.jsdelivr.net data:; img-src 'self' data: https://dadaring-uploads-dev.s3.ap-northeast-2.amazonaws.com https://dadaring-uploads-prod.s3.ap-northeast-2.amazonaws.com; connect-src 'self' https://dadaring-uploads-dev.s3.ap-northeast-2.amazonaws.com https://dadaring-uploads-prod.s3.ap-northeast-2.amazonaws.com https://vk5y4us4uxvs6lebtogalyloua0ttbte.lambda-url.ap-northeast-2.on.aws https://cognito-idp.ap-northeast-2.amazonaws.com https://dnbl3bo4eg.execute-api.ap-northeast-2.amazonaws.com https://c5gye4ook6.execute-api.ap-northeast-2.amazonaws.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
     }
   }
 }
@@ -73,8 +78,8 @@ default-src 'self';
 script-src 'self' 'unsafe-inline';                     # invite.html, get-app.html의 <script> 인라인 블록 허용
 style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;  # 인라인 style + Pretendard 폰트 CSS
 font-src 'self' https://cdn.jsdelivr.net data:;        # 폰트 + 폴백 data URI
-img-src 'self' data:;
-connect-src 'self';
+img-src 'self' data: <uploads-dev> <uploads-prod>;
+connect-src 'self' <uploads-dev> <uploads-prod> ...;
 frame-ancestors 'none';                                 # X-Frame-Options: DENY와 동일 효과 (현대 브라우저)
 base-uri 'self';
 form-action 'self';
