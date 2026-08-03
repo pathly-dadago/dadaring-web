@@ -997,7 +997,7 @@ function cpRender() {
       <div class="cp-thumb" title="이미지 없으면 이모지로 표시">${(b._preview || b.imageUrl) ? `<img src="${cpEsc(b._preview || b.imageUrl)}">` : `<span>${cpEsc(b.emoji || '🎁')}</span>`}</div>
       <label class="cp-up">📷 사진<input type="file" accept="image/*" style="display:none" onchange="cpUpload(${i},this)"></label>
       <input type="text" class="cp-emoji" value="${cpEsc(b.emoji)}" oninput="cpSet(${i},'emoji',this.value)" placeholder="🎁" title="이미지 없을 때 표시할 이모지">
-      <input type="color" value="${/^#[0-9a-fA-F]{6}$/.test(b.chipColor) ? b.chipColor : '#FBEBD3'}" oninput="cpSet(${i},'chipColor',this.value)" title="이모지칩 배경색">
+      <input type="color" value="${/^#[0-9a-fA-F]{6}$/.test(b.chipColor) ? b.chipColor : '#FFFFFF'}" oninput="cpSet(${i},'chipColor',this.value)" title="카드 배경색">
       <input type="text" class="cp-title" value="${cpEsc(b.title)}" oninput="cpSet(${i},'title',this.value)" placeholder="제목">
       <input type="text" class="cp-desc" value="${cpEsc(b.description)}" oninput="cpSet(${i},'description',this.value)" placeholder="한 줄 설명">
       <input type="text" class="cp-link" value="${cpEsc(b.linkUrl)}" oninput="cpSet(${i},'linkUrl',this.value)" placeholder="https://link.coupang.com/a/…">
@@ -1013,7 +1013,7 @@ function cpSet(i, k, v) {
   if (k === 'adType') cpRender();   // 타입 바뀌면 문구 미리보기 갱신
 }
 function cpAdd() {
-  cpBanners.push({ id: 'b' + Date.now(), emoji: '🎁', chipColor: '#FBEBD3',
+  cpBanners.push({ id: 'b' + Date.now(), emoji: '🎁', chipColor: '#FFFFFF',
     title: '', description: '', imageKey: '', linkUrl: '', active: true,
     adType: 'coupang', placement: 'dadaapp' });
   cpRender();
