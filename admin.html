@@ -109,6 +109,10 @@
     .cp-row .cp-link{flex:1;min-width:200px;font-size:11.5px;}
     .cp-row .cp-img{flex:1;min-width:170px;font-size:11.5px;}
     .cp-row .cp-type{border:1px solid var(--divider);border-radius:7px;padding:6px 6px;font-size:12.5px;background:var(--card);}
+    .cp-row .cp-thumb{width:40px;height:40px;border-radius:8px;border:1px solid var(--divider);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:20px;flex-shrink:0;background:var(--surface);}
+    .cp-row .cp-thumb img{width:100%;height:100%;object-fit:cover;}
+    .cp-row .cp-up{border:1px solid var(--divider);border-radius:7px;padding:6px 9px;font-size:11.5px;cursor:pointer;color:var(--ts);white-space:nowrap;}
+    .cp-row .cp-up:hover{border-color:var(--green);}
     .cp-row .cp-disc{flex-basis:100%;font-size:11px;color:var(--ts);padding:2px 2px 0;}
     .cp-row .cp-disc b{color:var(--greenD);}
     .cp-row input[type=color]{width:34px;height:30px;border:1px solid var(--divider);border-radius:7px;padding:0;background:none;}
@@ -315,9 +319,10 @@
     <div id="viewCoupang" class="hidden">
       <div class="cp-wrap">
         <h2>📢 광고</h2>
-        <p class="subs-hint">다다앱 최상단에 한 개씩 자동 회전하는 쿠팡 파트너스 배너예요.
-          이모지·색·문구·링크를 넣고 <b>저장</b>하면 앱에 바로 반영됩니다. 순서는 ↑↓, 노출은 체크박스로.
-          <br>필수 문구(<b>쿠팡 파트너스 · 수수료를 제공받는 광고입니다</b>)는 앱이 자동으로 넣어요.</p>
+        <p class="subs-hint">한 개씩 자동 회전하는 광고 배너예요. 각 배너의 <b>노출 위치</b>(다다앱/홈화면)와
+          <b>종류</b>(쿠팡/광고)를 고르고, 📷 사진 또는 이모지·제목·설명·링크를 넣어 <b>저장</b>하면 앱에 바로 반영됩니다.
+          순서는 ↑↓, 노출은 체크박스로. 위치별로 노출 배너가 하나도 없으면 그 화면에선 광고 카드가 아예 안 보여요.
+          <br>필수 문구(쿠팡=<b>쿠팡 파트너스 · 수수료를 제공받는 광고입니다</b>, 광고=<b>광고</b>)는 앱이 자동으로 넣어요.</p>
         <div id="cpList"></div>
         <div class="cp-actions">
           <button class="tb-btn" onclick="cpAdd()">+ 배너 추가</button>
@@ -981,15 +986,20 @@ function cpRender() {
     const disc = isAd ? '광고' : '쿠팡 파트너스 · 수수료를 제공받는 광고입니다';
     return `
     <div class="cp-row">
-      <select class="cp-type" onchange="cpSet(${i},'adType',this.value)">
+      <select class="cp-type" onchange="cpSet(${i},'placement',this.value)" title="노출 위치">
+        <option value="dadaapp" ${(b.placement || 'dadaapp') === 'home' ? '' : 'selected'}>다다앱</option>
+        <option value="home" ${(b.placement || 'dadaapp') === 'home' ? 'selected' : ''}>홈화면</option>
+      </select>
+      <select class="cp-type" onchange="cpSet(${i},'adType',this.value)" title="광고 종류">
         <option value="coupang" ${isAd ? '' : 'selected'}>쿠팡</option>
         <option value="ad" ${isAd ? 'selected' : ''}>광고</option>
       </select>
+      <div class="cp-thumb" title="이미지 없으면 이모지로 표시">${(b._preview || b.imageUrl) ? `<img src="${cpEsc(b._preview || b.imageUrl)}">` : `<span>${cpEsc(b.emoji || '🎁')}</span>`}</div>
+      <label class="cp-up">📷 사진<input type="file" accept="image/*" style="display:none" onchange="cpUpload(${i},this)"></label>
       <input type="text" class="cp-emoji" value="${cpEsc(b.emoji)}" oninput="cpSet(${i},'emoji',this.value)" placeholder="🎁" title="이미지 없을 때 표시할 이모지">
       <input type="color" value="${/^#[0-9a-fA-F]{6}$/.test(b.chipColor) ? b.chipColor : '#FBEBD3'}" oninput="cpSet(${i},'chipColor',this.value)" title="이모지칩 배경색">
       <input type="text" class="cp-title" value="${cpEsc(b.title)}" oninput="cpSet(${i},'title',this.value)" placeholder="제목">
       <input type="text" class="cp-desc" value="${cpEsc(b.description)}" oninput="cpSet(${i},'description',this.value)" placeholder="한 줄 설명">
-      <input type="text" class="cp-img" value="${cpEsc(b.imageUrl)}" oninput="cpSet(${i},'imageUrl',this.value)" placeholder="이미지 URL (비우면 이모지)">
       <input type="text" class="cp-link" value="${cpEsc(b.linkUrl)}" oninput="cpSet(${i},'linkUrl',this.value)" placeholder="https://link.coupang.com/a/…">
       <label><input type="checkbox" ${b.active ? 'checked' : ''} onchange="cpSet(${i},'active',this.checked)">노출</label>
       <button class="cp-mv" onclick="cpMove(${i},-1)" title="위로">↑</button>
@@ -1004,8 +1014,25 @@ function cpSet(i, k, v) {
 }
 function cpAdd() {
   cpBanners.push({ id: 'b' + Date.now(), emoji: '🎁', chipColor: '#FBEBD3',
-    title: '', description: '', imageUrl: '', linkUrl: '', active: true, adType: 'coupang' });
+    title: '', description: '', imageKey: '', linkUrl: '', active: true,
+    adType: 'coupang', placement: 'dadaapp' });
   cpRender();
+}
+async function cpUpload(i, input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  try {
+    const { url, key } = await api('/coupang/admin/upload-url',
+      { method: 'POST', body: JSON.stringify({ ext, contentType: file.type || 'image/jpeg' }) });
+    const put = await fetch(url, { method: 'PUT',
+      headers: { 'Content-Type': file.type || 'image/jpeg' }, body: file });
+    if (!put.ok) throw new Error('PUT ' + put.status);
+    cpBanners[i].imageKey = key;
+    const rd = new FileReader();
+    rd.onload = () => { cpBanners[i]._preview = rd.result; cpRender(); };
+    rd.readAsDataURL(file);
+  } catch (e) { alert('이미지 업로드 실패 ' + (e.status || e.message || '')); }
 }
 function cpDel(i) { cpBanners.splice(i, 1); cpRender(); }
 function cpMove(i, d) {
@@ -1017,8 +1044,10 @@ async function cpSave() {
   const bad = cpBanners.find(b => !b.title.trim() || !b.linkUrl.trim());
   if (bad) { msg.style.color = 'var(--red)'; msg.textContent = '제목·링크는 필수예요'; return; }
   try {
+    // 로컬 미리보기(_preview, dataURL)는 서버로 보내지 않는다.
+    const payload = cpBanners.map(({ _preview, imageUrl, ...b }) => b);
     const { banners } = await api('/coupang/admin/banners',
-      { method: 'PUT', body: JSON.stringify({ banners: cpBanners }) });
+      { method: 'PUT', body: JSON.stringify({ banners: payload }) });
     cpBanners = banners || [];
     cpRender();
     msg.style.color = 'var(--green)'; msg.textContent = '저장됐어요 ✓';
