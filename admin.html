@@ -122,6 +122,8 @@
     .cp-table .cp-up:hover{border-color:var(--green);}
     .cp-table .cp-datewrap{display:flex;flex-direction:column;gap:3px;}
     .cp-table .cp-st{white-space:nowrap;}
+    .cp-table .cp-num{white-space:nowrap;font-size:11.5px;line-height:1.45;font-variant-numeric:tabular-nums;}
+    .cp-table .cp-dim{color:var(--ts);font-size:10.5px;}
     .cp-table .cp-chip{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;}
     .cp-table .cp-chip-end{color:#B4232A;background:#FBE3E4;}
     .cp-table .cp-chip-wait{color:#8A6A12;background:#FBF0D2;}
@@ -658,6 +660,16 @@ const todayKST = () => new Date(Date.now() + 9 * 3600 * 1000).toISOString().slic
 const daysBefore = (day, n) =>
   new Date(new Date(day + 'T00:00:00Z').getTime() - n * 86400000).toISOString().slice(0, 10);
 
+// 광고 노출·클릭 집계 — 대시보드 그래프와 광고 탭 표에서 함께 쓴다.
+// {byBanner:{id:{imp,clk}}, daily:[{date,imp,clk}]}
+let cpStats = null;
+async function loadCpStats(days) {
+  try {
+    cpStats = await api(`/coupang/admin/stats?days=${days}`);
+  } catch (e) { cpStats = null; }
+  return cpStats;
+}
+
 async function loadStats() {
   const key = statsCacheKey();
   if (!statsCache[key]) {
@@ -673,6 +685,8 @@ async function loadStats() {
       return;
     }
   }
+  // 광고 집계는 별도 API — 실패해도 나머지 통계는 그대로 보여준다.
+  await loadCpStats(statsPeriod === 'all' ? 180 : Number(statsPeriod) || 90);
   renderStats();
 }
 
@@ -928,6 +942,18 @@ function renderStats() {
 
   const legend = items => `<div class="legend">${items.map(([c, l]) =>
     `<span><i style="background:${c}"></i>${l}</span>`).join('')}</div>`;
+
+  // 광고 노출·클릭 — 선택한 기간/단위에 맞춰 버켓팅. 합계·CTR 은 제목 옆에.
+  const adDaily = (cpStats?.daily || []).filter(r => !cutoff || r.date >= cutoff);
+  const adRows = bucket(adDaily, statsUnit, (a, r) => ({
+    imp: (a?.imp || 0) + (Number(r.imp) || 0),
+    clk: (a?.clk || 0) + (Number(r.clk) || 0),
+  }));
+  const adImp = adRows.reduce((s, r) => s + r.imp, 0);
+  const adClk = adRows.reduce((s, r) => s + r.clk, 0);
+  const adTotalNote = adImp
+    ? ` — 노출 ${fmtInt(adImp)} · 클릭 ${fmtInt(adClk)} · CTR ${(adClk / adImp * 100).toFixed(2)}%`
+    : '';
   const acLabel = statsUnit === 'month' ? 'MAU · 30일 롤링'
                 : statsUnit === 'week' ? 'WAU · 7일 롤링' : 'DAU · 일별';
   document.getElementById('statsBody').innerHTML = `
@@ -945,6 +971,9 @@ function renderStats() {
       <tbody>${tierRows}</tbody></table>
       ${stackedBarChart(tkRows)}
       ${tkRows.length ? legend(TIER_SEGS.map(s => [s.color, s.label])) : ''}</div>
+    <div class="scard"><h2>광고 노출·클릭 (${UNIT_LABEL[statsUnit]})${adTotalNote}</h2>
+      ${barLineChart(adRows, 'imp', 'clk')}
+      ${adRows.length ? legend([['#7FD6A4', '노출 (좌축)'], ['#35A866', '클릭 (우축)']]) : ''}</div>
     <div class="scard"><h2>기능별 AI 사용${featWindowNote()}</h2>${featHtml}</div>
     <div class="scard"><h2>저장공간 (사진) — 총 ${fmtBytes(stor.total)}</h2>${storHtml}</div>`;
 }
@@ -1002,9 +1031,17 @@ async function cpLoad() {
     const { banners } = await api('/coupang/admin/banners');
     cpBanners = banners || [];
   } catch (e) { cpBanners = []; }
+  await loadCpStats(30);   // 표의 노출·클릭은 최근 30일 기준
   cpRender();
 }
 function cpEsc(s) { return String(s == null ? '' : s).replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+/// 배너별 최근 30일 노출·클릭·CTR 셀. 집계 전(또는 조회 실패)이면 '–'.
+function cpPerf(id) {
+  const s = cpStats?.byBanner?.[id];
+  if (!s || !(s.imp || s.clk)) return '<span class="cp-dim">–</span>';
+  const ctr = s.imp ? (s.clk / s.imp * 100).toFixed(1) + '%' : '–';
+  return `<b>${fmtInt(s.clk)}</b> 클릭<br><span class="cp-dim">${fmtInt(s.imp)} 노출 · ${ctr}</span>`;
+}
 function cpRender() {
   const box = document.getElementById('cpList');
   if (!cpBanners.length) { box.innerHTML = '<div class="empty">배너가 없어요. “+ 배너 추가”로 시작하세요.</div>'; return; }
@@ -1036,6 +1073,7 @@ function cpRender() {
       <td><span class="cp-tag">${tag}</span><br>
         <input type="text" class="cp-discin" value="${cpEsc(b.disclosure || '')}" oninput="cpSet(${i},'disclosure',this.value)"
           placeholder="${isAd ? '비우면 AD 칩만' : CP_COUPANG_DISC}"></td>
+      <td class="cp-num">${cpPerf(b.id)}</td>
       <td style="text-align:center"><input type="checkbox" ${b.active ? 'checked' : ''} onchange="cpSet(${i},'active',this.checked)"></td>
       <td style="white-space:nowrap">
         <button class="cp-mv" onclick="cpMove(${i},-1)" title="위로">↑</button>
@@ -1045,7 +1083,8 @@ function cpRender() {
   box.innerHTML = `<div class="cp-scroll"><table class="cp-table">
     <thead><tr>
       <th>상태</th><th>위치</th><th>타입</th><th>이미지</th><th>이모지</th><th>색</th>
-      <th>제목</th><th>설명</th><th>링크</th><th>노출 기간</th><th>문구</th><th>노출</th><th>관리</th>
+      <th>제목</th><th>설명</th><th>링크</th><th>노출 기간</th><th>문구</th>
+      <th>성과 (30일)</th><th>노출</th><th>관리</th>
     </tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 function cpSet(i, k, v) {
