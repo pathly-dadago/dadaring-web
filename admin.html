@@ -121,6 +121,11 @@
     .cp-table .cp-up{display:inline-block;border:1px solid var(--divider);border-radius:6px;padding:3px 7px;font-size:11px;cursor:pointer;color:var(--ts);white-space:nowrap;margin-top:3px;}
     .cp-table .cp-up:hover{border-color:var(--green);}
     .cp-table .cp-datewrap{display:flex;flex-direction:column;gap:3px;}
+    .cp-table .cp-st{white-space:nowrap;}
+    .cp-table .cp-chip{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;}
+    .cp-table .cp-chip-end{color:#B4232A;background:#FBE3E4;}
+    .cp-table .cp-chip-wait{color:#8A6A12;background:#FBF0D2;}
+    .cp-table .cp-chip-off{color:var(--ts);background:var(--surface);border:1px solid var(--divider);}
     .cp-table .cp-mv{background:none;border:1px solid var(--divider);border-radius:6px;width:24px;height:24px;cursor:pointer;color:var(--ts);}
     .cp-table .cp-del{background:none;border:0;color:var(--red);cursor:pointer;font-size:15px;}
     .cp-actions{display:flex;align-items:center;gap:10px;margin-top:12px;}
@@ -326,7 +331,8 @@
           <b>종류</b>(쿠팡/광고)를 고르고, 📷 사진 또는 이모지·제목·설명·링크를 넣어 <b>저장</b>하면 앱에 바로 반영됩니다.
           순서는 ↑↓, 노출은 체크박스로. 위치별로 노출 배너가 하나도 없으면 그 화면에선 광고 카드가 아예 안 보여요.
           <br><b>노출 기간</b>은 시작일·종료일을 넣으면 그 기간(당일 포함)에만 앱에 나와요. 비우면 그 방향은 제한 없음.
-          목록은 <b>종료일이 먼 순서</b>로 정렬돼요(종료일 없는 배너가 맨 위, 곧 끝나는 배너가 아래).
+          지금 앱에 안 나오는 배너는 맨 앞에 <b>종료됨</b>·<b>대기중</b>·<b>숨김</b> 표시가 붙어요.
+          목록 순서 = 앱 노출 순서라 자동 정렬하지 않아요(↑↓ 로 조정).
           <br><b>문구</b>는 카드 하단 고지예요. 종류를 바꾸면 기본값이 채워지고(쿠팡=<b>쿠팡 파트너스 · 수수료를
           제공받는 광고입니다</b>, 광고=비움), 직접 수정할 수 있어요. 비우면 칩(쿠팡/AD)만 보여요.</p>
         <div id="cpList"></div>
@@ -977,21 +983,24 @@ function renderMarketing() {
 // ── 쿠팡 배너 관리 ──
 let cpBanners = [];
 const CP_COUPANG_DISC = '쿠팡 파트너스 · 수수료를 제공받는 광고입니다';
-/// 종료일이 먼(오래 남은) 배너가 위로 — 무제한(종료일 없음)이 최상단, 곧 끝나는 광고가 아래.
-/// sort 는 안정 정렬이라 종료일이 같으면 기존(=앱 노출) 순서를 유지한다.
-function cpSortByEnd(list) {
-  return list.slice().sort((a, b) => {
-    const ae = String(a.endDate || '').trim(), be = String(b.endDate || '').trim();
-    if (!ae && !be) return 0;
-    if (!ae) return -1;   // 무제한이 위로
-    if (!be) return 1;
-    return be.localeCompare(ae);  // 늦게 끝나는 것이 위로
-  });
+/// 오늘 날짜(로컬, YYYY-MM-DD) — 종료 여부 판정용. 서버 필터는 KST 기준.
+function cpToday() {
+  const d = new Date(), p = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+}
+/// 배너 상태 칩. 노출 순서는 ↑↓ 수동이라 정렬하지 않고, 상태만 눈에 띄게 표시한다.
+function cpStatusChip(b) {
+  const today = cpToday();
+  const end = String(b.endDate || '').trim(), start = String(b.startDate || '').trim();
+  if (end && end < today) return '<span class="cp-chip cp-chip-end">종료됨</span>';
+  if (start && start > today) return '<span class="cp-chip cp-chip-wait">대기중</span>';
+  if (!b.active) return '<span class="cp-chip cp-chip-off">숨김</span>';
+  return '';
 }
 async function cpLoad() {
   try {
     const { banners } = await api('/coupang/admin/banners');
-    cpBanners = cpSortByEnd(banners || []);
+    cpBanners = banners || [];
   } catch (e) { cpBanners = []; }
   cpRender();
 }
@@ -1007,6 +1016,7 @@ function cpRender() {
       ? `<img src="${cpEsc(b._preview || b.imageUrl)}">` : `<span>${cpEsc(b.emoji || '🎁')}</span>`;
     return `
     <tr>
+      <td class="cp-st">${cpStatusChip(b)}</td>
       <td><select class="cp-type" onchange="cpSet(${i},'placement',this.value)">
         <option value="dadaapp" ${(b.placement || 'dadaapp') === 'home' ? '' : 'selected'}>다다앱</option>
         <option value="home" ${(b.placement || 'dadaapp') === 'home' ? 'selected' : ''}>홈화면</option></select></td>
@@ -1034,7 +1044,7 @@ function cpRender() {
     </tr>`; }).join('');
   box.innerHTML = `<div class="cp-scroll"><table class="cp-table">
     <thead><tr>
-      <th>위치</th><th>타입</th><th>이미지</th><th>이모지</th><th>색</th>
+      <th>상태</th><th>위치</th><th>타입</th><th>이미지</th><th>이모지</th><th>색</th>
       <th>제목</th><th>설명</th><th>링크</th><th>노출 기간</th><th>문구</th><th>노출</th><th>관리</th>
     </tr></thead><tbody>${rows}</tbody></table></div>`;
 }
@@ -1044,6 +1054,8 @@ function cpSet(i, k, v) {
     // 타입 바뀌면 고지 문구 기본값: 쿠팡=파트너스 문구, 광고=빈(AD 칩만)
     cpBanners[i].disclosure = v === 'ad' ? '' : CP_COUPANG_DISC;
     cpRender();
+  } else if (k === 'startDate' || k === 'endDate' || k === 'active') {
+    cpRender();   // 상태 칩(종료됨/대기중/숨김) 갱신 — 텍스트 입력은 포커스 유지 위해 제외
   }
 }
 function cpAdd() {
@@ -1083,7 +1095,7 @@ async function cpSave() {
     const payload = cpBanners.map(({ _preview, imageUrl, ...b }) => b);
     const { banners } = await api('/coupang/admin/banners',
       { method: 'PUT', body: JSON.stringify({ banners: payload }) });
-    cpBanners = cpSortByEnd(banners || []);
+    cpBanners = banners || [];
     cpRender();
     msg.style.color = 'var(--green)'; msg.textContent = '저장됐어요 ✓';
     setTimeout(() => { msg.textContent = ''; }, 2500);
