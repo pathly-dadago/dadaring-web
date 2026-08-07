@@ -133,6 +133,27 @@
     .cp-actions{display:flex;align-items:center;gap:10px;margin-top:12px;}
     .cp-save{background:var(--green)!important;color:#fff!important;border-color:var(--green)!important;}
     .cp-msg{font-size:13px;color:var(--green);}
+    /* 🤖 자동생성(쿠팡 API) 섹션 — 읽기 전용 목록 + 차단/해제. 수동 표(cp-table)와
+       저장이 완전히 분리돼 있어 별도 테이블 클래스를 쓴다. */
+    .cp-auto-wrap{margin-top:28px;padding-top:18px;border-top:1px solid var(--divider);}
+    .cp-auto-wrap h3{font-size:15px;margin-bottom:6px;}
+    table.cp-auto-table{border-collapse:collapse;width:100%;min-width:640px;}
+    table.cp-auto-table th{background:var(--surface);color:var(--ts);font-weight:600;font-size:11px;
+      text-align:left;padding:8px;border-bottom:1px solid var(--divider);white-space:nowrap;}
+    table.cp-auto-table td{padding:6px 8px;border-bottom:1px solid var(--divider);vertical-align:middle;font-size:12.5px;}
+    table.cp-auto-table tbody tr:last-child td{border-bottom:0;}
+    .cp-auto-table .cp-thumb{width:38px;height:38px;border-radius:8px;border:1px solid var(--divider);
+      display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:18px;background:var(--surface);}
+    .cp-auto-table .cp-thumb img{width:100%;height:100%;object-fit:cover;}
+    .cp-auto-table .cp-auto-link{color:var(--greenD,#35A866);text-decoration:none;font-size:11.5px;}
+    .cp-auto-table .cp-auto-pid{color:var(--ts);font-size:11px;font-variant-numeric:tabular-nums;white-space:nowrap;}
+    .cp-block-head{font-size:12.5px;color:var(--ts);margin-top:14px;margin-bottom:6px;}
+    .cp-block-list{display:flex;flex-wrap:wrap;gap:8px;}
+    .cp-block-chip{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--divider);
+      border-radius:999px;padding:5px 6px 5px 12px;font-size:12px;font-variant-numeric:tabular-nums;}
+    .cp-block-chip button{border:none;background:#2e9e6b;color:#fff;border-radius:999px;width:22px;height:22px;
+      cursor:pointer;font-size:12px;line-height:1;padding:0;}
+    .cp-block-chip button:hover{opacity:.9;}
     .mkt-post{background:var(--card);border:1px solid var(--divider);border-radius:14px;
       padding:18px 20px;margin-top:16px;}
     .mkt-post-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px;}
@@ -342,6 +363,16 @@
           <button class="tb-btn" onclick="cpAdd()">+ 배너 추가</button>
           <button class="tb-btn cp-save" onclick="cpSave()">💾 저장</button>
           <span id="cpMsg" class="cp-msg"></span>
+        </div>
+
+        <div class="cp-auto-wrap">
+          <h3>🤖 자동생성 (쿠팡 API)</h3>
+          <p class="subs-hint">쿠팡 파트너스 API가 매일 <b>00:30 KST</b>에 골드박스 상품을 자동 수집해 채우는
+            읽기 전용 배너예요. 위 수동 배너와 저장이 완전히 분리돼 있어 <b>💾 저장</b>은 이 목록에 영향을 주지
+            않아요. 상품 가격은 변동이 잦아 표시하지 않아요. 마음에 안 드는 상품은 <b>차단</b>하면 즉시 노출이
+            멈추고 다시 수집되지 않아요(해제하면 다음 수집부터 다시 후보에 포함).</p>
+          <div id="cpAutoList"></div>
+          <div id="cpBlockList"></div>
         </div>
       </div>
     </div>
@@ -576,7 +607,7 @@ function showView(v) {
   if (v === 'stats') loadStats();
   if (v === 'subs') subLoadList();
   if (v === 'marketing') renderMarketing();
-  if (v === 'coupang') cpLoad();
+  if (v === 'coupang') { cpLoad(); cpAutoLoad(); }
 }
 
 // 우상단 새로고침 — 페이지 리로드 없이(세션 유지) 현재 화면 데이터를 다시 불러온다.
@@ -1141,6 +1172,85 @@ async function cpSave() {
   } catch (e) {
     msg.style.color = 'var(--red)'; msg.textContent = '저장 실패 ' + (e.status || '');
   }
+}
+
+/* ── 🤖 자동생성(쿠팡 API) 섹션 ─────────────────────────────────────────
+   cron(00:30 KST)이 채우는 읽기 전용 배너 + 차단 목록. 저장이 위 수동
+   배너(cpBanners/cpSave)와 완전히 분리된 별도 엔드포인트라 cpSave 는
+   여기 손대지 않는다 — 상태도 별도 변수(cpAutoBanners/cpAutoBlocklist). */
+let cpAutoBanners = [], cpAutoBlocklist = [];
+
+async function cpAutoLoad() {
+  const listBox = document.getElementById('cpAutoList');
+  listBox.innerHTML = '<div class="muted">불러오는 중…</div>';
+  try {
+    const data = await api('/coupang/admin/auto');
+    cpAutoBanners = data.banners || [];
+    cpAutoBlocklist = data.blocklist || [];
+  } catch (e) {
+    listBox.innerHTML = `<div class="subs-result err">자동 배너를 못 불러왔어요: ${esc(e.message)}</div>`;
+    document.getElementById('cpBlockList').innerHTML = '';
+    return;
+  }
+  cpAutoRender();
+}
+
+// 링크는 표에서 축약 표시(전체 URL은 title 툴팁 + 클릭 시 새 탭으로 열림).
+function cpAutoShortLink(url) {
+  const s = String(url || '');
+  if (!s) return '(링크 없음)';
+  return s.length > 36 ? s.slice(0, 36) + '…' : s;
+}
+
+function cpAutoRender() {
+  const listBox = document.getElementById('cpAutoList');
+  if (!cpAutoBanners.length) {
+    listBox.innerHTML = '<div class="empty">아직 수집된 자동 배너가 없어요 — 매일 00:30 KST 수집</div>';
+  } else {
+    const rows = cpAutoBanners.map(b => `
+      <tr>
+        <td><div class="cp-thumb">${b.imageUrl ? `<img src="${cpEsc(b.imageUrl)}">` : '🎁'}</div></td>
+        <td>${cpEsc(b.title)}</td>
+        <td>${cpEsc(b.description)}</td>
+        <td><a class="cp-auto-link" href="${cpEsc(b.linkUrl)}" target="_blank" rel="noopener"
+            title="${cpEsc(b.linkUrl)}">${cpEsc(cpAutoShortLink(b.linkUrl))}</a></td>
+        <td class="cp-auto-pid">${cpEsc(b.productId)}</td>
+        <td><button class="sb-mini sb-revoke" data-pid="${cpEsc(b.productId)}">차단</button></td>
+      </tr>`).join('');
+    listBox.innerHTML = `<div class="cp-scroll"><table class="cp-auto-table">
+      <thead><tr><th>이미지</th><th>상품명</th><th>설명</th><th>링크</th><th>상품ID</th><th>관리</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>`;
+    // productId 를 문자열로 안전하게 넘기려 data-속성 + 이벤트 바인딩(subRevoke 와 동일 패턴,
+    // onclick 인라인 문자열에 값을 직접 끼워넣지 않는다).
+    listBox.querySelectorAll('button[data-pid]').forEach(btn =>
+      btn.onclick = () => cpAutoBlock(btn.dataset.pid));
+  }
+
+  const blockBox = document.getElementById('cpBlockList');
+  if (!cpAutoBlocklist.length) {
+    blockBox.innerHTML = '';   // 차단 목록 비어있으면 섹션 자체를 숨김
+  } else {
+    blockBox.innerHTML = `<div class="cp-block-head">🚫 차단 목록 (재수집 안 됨)</div>
+      <div class="cp-block-list">${cpAutoBlocklist.map(pid => `
+        <span class="cp-block-chip">${cpEsc(pid)}<button data-pid="${cpEsc(pid)}" title="차단 해제">↺</button></span>`).join('')}</div>`;
+    blockBox.querySelectorAll('button[data-pid]').forEach(btn =>
+      btn.onclick = () => cpAutoUnblock(btn.dataset.pid));
+  }
+}
+
+async function cpAutoBlock(productId) {
+  if (!confirm('이 상품을 차단할까요? 즉시 노출 중단되고 재수집되지 않아요.')) return;
+  try {
+    await api('/coupang/admin/auto/block', { method: 'POST', body: JSON.stringify({ productId }) });
+    await cpAutoLoad();
+  } catch (e) { alert('차단 실패: ' + e.message); }
+}
+
+async function cpAutoUnblock(productId) {
+  try {
+    await api('/coupang/admin/auto/unblock', { method: 'POST', body: JSON.stringify({ productId }) });
+    await cpAutoLoad();
+  } catch (e) { alert('해제 실패: ' + e.message); }
 }
 
 function mktOpen(i) {
