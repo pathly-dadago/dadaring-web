@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<!-- 인스타 카드뉴스 렌더 소스 (1080x1350, 4:5). #card1~#card6 해시로 한 장씩 표시.
+     캡처: chrome headless --window-size=1080,1350 --screenshot=cardN.png cards.html#cardN -->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+  :root {
+    --primary: #43C67A; --primary-dark: #35A866; --surface: #EAF8F0;
+    --bg: #F5FFF9; --ink: #2D3436; --sub: #5E7468;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard', sans-serif; word-break: keep-all; }
+  .card { display: none; width: 1080px; height: 1350px; position: relative; overflow: hidden;
+          background: var(--bg); flex-direction: column; padding: 90px 84px; }
+  .card:target { display: flex; }
+  .brand { position: absolute; top: 64px; right: 84px; font-size: 34px; font-weight: 800;
+           color: var(--primary-dark); letter-spacing: -1px; }
+  .pageno { position: absolute; bottom: 56px; right: 84px; font-size: 26px; color: #B8C5D0; font-weight: 600; }
+  .kicker { font-size: 34px; font-weight: 700; color: var(--primary-dark); margin-bottom: 28px; }
+  h1 { font-size: 82px; font-weight: 800; line-height: 1.28; letter-spacing: -2px; color: var(--ink); }
+  h1 .hl { color: var(--primary-dark); }
+  .sub { font-size: 40px; line-height: 1.6; color: var(--sub); margin-top: 40px; font-weight: 500; }
+  .center { justify-content: center; }
+  .paper { background: #fff; border: 3px solid var(--surface); border-radius: 32px;
+           padding: 44px 50px; box-shadow: 0 16px 40px rgba(31,51,41,.08);
+           font-size: 38px; font-weight: 600; color: var(--ink); line-height: 1.85;
+           width: fit-content; }
+  .paper small { display: block; font-size: 30px; color: #B8C5D0; font-weight: 700; letter-spacing: 0; margin-bottom: 16px; }
+  .paper .x { color: #C9A227; }
+  .shot-wrap { flex: 1; display: flex; align-items: center; justify-content: center; margin-top: 48px; }
+  .shot-wrap img { border-radius: 36px; border: 2px solid #D8F0E3;
+                   box-shadow: 0 24px 64px rgba(31,51,41,.14); }
+  .rows { margin-top: 64px; display: flex; flex-direction: column; gap: 36px; }
+  .row { background: #fff; border: 2px solid #D8F0E3; border-radius: 32px; padding: 44px 48px;
+         display: flex; gap: 36px; align-items: flex-start;
+         box-shadow: 0 12px 32px rgba(31,51,41,.06); }
+  .row .emoji { font-size: 64px; line-height: 1.1; }
+  .row h3 { font-size: 44px; font-weight: 800; color: var(--ink); margin-bottom: 10px; }
+  .row p { font-size: 34px; line-height: 1.55; color: var(--sub); }
+  /* 4번 카드 — 이번 주만 vs 매주 반복 대비 */
+  .pick { margin-top: 64px; display: flex; flex-direction: column; gap: 32px; }
+  .pick .opt { background: #fff; border: 3px solid #D8F0E3; border-radius: 32px; padding: 44px 48px;
+               box-shadow: 0 12px 32px rgba(31,51,41,.06); }
+  .pick .opt.on { border-color: var(--primary); background: #F2FCF6; }
+  .pick .opt .tag { display: inline-block; font-size: 30px; font-weight: 800; color: var(--primary-dark);
+                    background: var(--surface); border-radius: 999px; padding: 10px 26px; margin-bottom: 18px; }
+  .pick .opt h3 { font-size: 46px; font-weight: 800; color: var(--ink); margin-bottom: 12px; }
+  .pick .opt p { font-size: 34px; line-height: 1.55; color: var(--sub); }
+  .cta-box { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+             border-radius: 48px; padding: 96px 72px; text-align: center; margin-top: 72px; }
+  .cta-box h2 { font-size: 72px; font-weight: 800; color: #fff; letter-spacing: -1px; }
+  .cta-box p { font-size: 40px; color: rgba(255,255,255,.9); margin-top: 24px; }
+  .stores { display: flex; gap: 28px; justify-content: center; margin-top: 56px; }
+  .stores span { background: #2D3436; color: #fff; font-size: 36px; font-weight: 700;
+                 padding: 28px 48px; border-radius: 24px; }
+  /* 5호 — 상태 배지 목록 */
+  .stat { margin-top: 60px; display: flex; flex-direction: column; gap: 30px; }
+  .stat .s { background: #fff; border: 2px solid #D8F0E3; border-radius: 30px; padding: 40px 46px;
+             display: flex; align-items: center; gap: 32px; box-shadow: 0 12px 32px rgba(31,51,41,.06); }
+  .stat .dot { width: 26px; height: 26px; border-radius: 50%; flex: none; }
+  .stat b { display: block; font-size: 46px; font-weight: 800; color: var(--ink); }
+  .stat span { display: block; font-size: 34px; color: var(--sub); margin-top: 8px; }
+  .money { background: #fff; border: 3px solid var(--surface); border-radius: 36px; padding: 56px 60px;
+           box-shadow: 0 16px 40px rgba(31,51,41,.08); margin-top: 60px; }
+  .money .lbl { font-size: 32px; color: #B8C5D0; font-weight: 700; }
+  .money .amt { font-size: 92px; font-weight: 800; color: var(--ink); letter-spacing: -3px; margin-top: 10px; }
+  .money .split { display: flex; gap: 20px; margin-top: 34px; }
+  .money .split div { flex: 1; border-radius: 24px; padding: 28px 30px; }
+  .money .split .paid { background: #EAF8F0; }
+  .money .split .due { background: #FDF3E2; }
+  .money .split small { display: block; font-size: 28px; font-weight: 700; color: var(--sub); }
+  .money .split strong { display: block; font-size: 40px; font-weight: 800; color: var(--ink); margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<!-- 1: 훅 -->
+<section class="card center" id="card1">
+  <div class="brand">DADAring</div>
+  <div class="paper"><small>이번 달 결제일</small>· 피아노 3일<br>· 태권도 10일<br>· 영어 25일 …<span class="x">💸</span></div>
+  <h1 style="margin-top:72px;">"학원비<br><span class="hl">다 나간 건가?"</span></h1>
+  <p class="sub">확인하려면 카드 내역을<br>뒤져야 하죠.</p>
+  <div class="pageno">1 / 6</div>
+</section>
+
+<!-- 2: 해법 -->
+<section class="card" id="card2">
+  <div class="brand">DADAring</div>
+  <div class="kicker">다다링 학원비</div>
+  <h1>한 번 넣으면<br><span class="hl">매달 자동으로</span></h1>
+  <div class="shot-wrap"><img src="_price-clean.png" alt="" style="width:520px;"></div>
+  <div class="pageno">2 / 6</div>
+</section>
+
+<!-- 3: 상태 -->
+<section class="card center" id="card3">
+  <div class="brand">DADAring</div>
+  <div class="kicker">날짜 계산하지 마세요</div>
+  <h1>낸 곳, 안 낸 곳<br><span class="hl">한눈에</span></h1>
+  <div class="stat">
+    <div class="s"><i class="dot" style="background:#35A866"></i><div><b>납부완료</b><span>이미 낸 곳</span></div></div>
+    <div class="s"><i class="dot" style="background:#E8A317"></i><div><b>미납 · D-6</b><span>결제일까지 며칠</span></div></div>
+    <div class="s"><i class="dot" style="background:#E85D4A"></i><div><b>결제일 지남</b><span>아직 안 낸 곳</span></div></div>
+  </div>
+  <p class="sub" style="font-size:34px;margin-top:44px;">냈으면 "납부했어요" 탭 한 번.</p>
+  <div class="pageno">3 / 6</div>
+</section>
+
+<!-- 4: 총액 요약 -->
+<section class="card center" id="card4">
+  <div class="brand">DADAring</div>
+  <div class="kicker">이번 달</div>
+  <h1>낸 돈과<br><span class="hl">앞으로 낼 돈</span></h1>
+  <div class="money">
+    <div class="lbl">총 금액</div>
+    <div class="amt">520,000원</div>
+    <div class="split">
+      <div class="paid"><small>납부</small><strong>250,000원</strong></div>
+      <div class="due"><small>미납</small><strong>270,000원</strong></div>
+    </div>
+  </div>
+  <p class="sub" style="font-size:34px;margin-top:44px;">아이별로도 걸러 볼 수 있어요.</p>
+  <div class="pageno">4 / 6</div>
+</section>
+
+<!-- 5: 건너뛰기·추이 -->
+<section class="card" id="card5">
+  <div class="brand">DADAring</div>
+  <div class="kicker">이런 것까지</div>
+  <h1>방학도,<br><span class="hl">1년 치도</span></h1>
+  <div class="rows">
+    <div class="row"><div class="emoji">🏖</div><div><h3>이번 달 건너뛰기</h3><p>방학엔 그 달만 빼고, 다음 달엔 원래대로</p></div></div>
+    <div class="row"><div class="emoji">📊</div><div><h3>월간·년간 추이</h3><p>사교육비가 어떻게 흘러가는지 쌓여요</p></div></div>
+    <div class="row"><div class="emoji">🔔</div><div><h3>결제일 알림</h3><p>"학원명 · 금액"이 그대로 담긴 알림</p></div></div>
+  </div>
+  <div class="pageno">5 / 6</div>
+</section>
+
+<!-- 6: CTA -->
+<section class="card center" id="card6">
+  <div class="brand">DADAring</div>
+  <h1>카드 내역 안 뒤져도,<br><span class="hl">한 줄로 보입니다</span></h1>
+  <p class="sub">학원비 · 학원 일정 · 위젯 · 알림장 · AR 영어독서</p>
+  <div class="cta-box">
+    <h2>다다링, 무료로 시작</h2>
+    <p>스토어에서 "다다링"을 검색하세요</p>
+    <div class="stores"><span>🍎 App Store</span><span>🤖 Google Play</span></div>
+  </div>
+  <div class="pageno">6 / 6</div>
+</section>
+
+</body>
+</html>
