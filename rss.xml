@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 새 글 발행 시 맨 위에 <item> 추가 + <lastBuildDate> 갱신 (docs/blog-post-template.html 체크리스트) -->
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>다다링 블로그</title>
+    <link>https://www.dadaring.com/blog</link>
+    <description>바쁜 부모를 위한 아이 일정·학원 관리 이야기. 매주 하나씩, 다다링을 200% 활용하는 법을 전해드려요.</description>
+    <language>ko</language>
+    <lastBuildDate>Fri, 07 Aug 2026 09:00:00 +0900</lastBuildDate>
+    <atom:link href="https://www.dadaring.com/rss.xml" rel="self" type="application/rss+xml"/>
+
+    <item>
+      <title>학원비, 결제일 놓치지 않고 한 달에 얼마 쓰는지 한눈에 — 학원비 관리</title>
+      <link>https://www.dadaring.com/blog/tuition-management</link>
+      <guid isPermaLink="true">https://www.dadaring.com/blog/tuition-management</guid>
+      <pubDate>Fri, 07 Aug 2026 09:00:00 +0900</pubDate>
+      <description>피아노는 3일, 태권도는 10일, 영어는 25일… 결제일이 제각각이라 이번 달 얼마 나갔는지도 모르고 지나가죠. 수강료와 결제일만 한 번 넣어두면 매달 자동으로 정리되는 학원비 관리를 소개합니다.</description>
+    </item>
+    <item>
+      <title>요일마다 다른 아이 학원 일정, 한 화면에 정리하는 법 — 주간 시간표</title>
+      <link>https://www.dadaring.com/blog/child-timetable</link>
+      <guid isPermaLink="true">https://www.dadaring.com/blog/child-timetable</guid>
+      <pubDate>Thu, 06 Aug 2026 09:00:00 +0900</pubDate>
+      <description>월요일은 피아노, 화요일은 영어, 목요일은 또 영어인데 30분 늦고… 요일마다 다른 학원 시간을 머릿속으로 외우는 대신, 한 번 등록하면 매주 자동으로 채워지는 주간 시간표 사용법을 정리했습니다.</description>
+    </item>
+    <item>
+      <title>가정통신문, 사진 한 장이면 할 일이 저절로 정리돼요 — 알림장 AI</title>
+      <link>https://www.dadaring.com/blog/notice-ai</link>
+      <guid isPermaLink="true">https://www.dadaring.com/blog/notice-ai</guid>
+      <pubDate>Fri, 24 Jul 2026 09:00:00 +0900</pubDate>
+      <description>현장학습 준비물, 상담 신청 마감, 원비 납부일… 통신문 볼 때마다 캘린더에 옮겨 적으셨나요? 사진 한 장 찍으면 AI가 날짜·준비물·신청 링크까지 할 일로 자동 정리해주는 알림장 기능을 소개합니다.</description>
+    </item>
+    <item>
+      <title>영어학원 AR 성적표, 사진 한 장으로 성장 그래프 만드는 법</title>
+      <link>https://www.dadaring.com/blog/ar-english-reading</link>
+      <guid isPermaLink="true">https://www.dadaring.com/blog/ar-english-reading</guid>
+      <pubDate>Thu, 23 Jul 2026 09:00:00 +0900</pubDate>
+      <description>SS 512? GE 3.4? ZPD 3.5~5.5? 영어학원에서 받아오는 AR·Star Reading 평가서, 지표 읽는 법부터 사진 한 장으로 성장 그래프·또래 비교·AI 분석까지 자동으로 만드는 방법을 정리했습니다.</description>
+    </item>
+    <item>
+      <title>아이 학원 일정, 앱을 열지 않아도 홈 화면에서 바로 — 위젯 활용법</title>
+      <link>https://www.dadaring.com/blog/widget-home-screen</link>
+      <guid isPermaLink="true">https://www.dadaring.com/blog/widget-home-screen</guid>
+      <pubDate>Tue, 21 Jul 2026 09:00:00 +0900</pubDate>
+      <description>"오늘 피아노더라? 태권도더라?" 매일 아침 앱을 뒤지는 대신, 홈 화면 위젯으로 아이의 오늘 일정과 주간 시간표를 바로 확인하는 방법을 소개합니다.</description>
+    </item>
+  </channel>
+</rss>

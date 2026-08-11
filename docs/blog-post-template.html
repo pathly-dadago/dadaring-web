@@ -4,7 +4,9 @@
   새 글 체크리스트:
     1. 이 파일을 blog/<slug>.html 로 복사, TODO 전부 치환
     2. blog/index.html 목록 맨 위에 카드 추가 (.post-body + .post-thumb 대표이미지 포함)
-    3. sitemap.xml 에 <url> 한 줄 추가
+    3. sitemap.xml 에 <url> 한 줄 추가 (lastmod 포함, / 와 /blog 의 lastmod 도 갱신)
+    3-1. rss.xml 맨 위에 <item> 추가 + <lastBuildDate> 갱신
+         (네이버 서치어드바이저 RSS 제출용 — 새 글 수집을 앞당김)
     4. 본문 이미지는 680px JPEG로 변환해 images/ 에 추가
        (sips -s format jpeg -s formatOptions 82 -\-resampleWidth 680 <src> -\-out images/<name>-680.jpg)
     5. [루틴] 채널 버전 세트 제작: 네이버 원고·인스타 캡션+카드뉴스·스레드 3종
