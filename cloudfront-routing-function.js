@@ -16,6 +16,10 @@ function handler(event) {
     if (uri.match(/^\/invite\/[A-Z0-9]+$/i)) {
         request.uri = '/invite.html';
     }
+    // /class/<svcId>  →  serve /class.html  (클래스 공유 랜딩 — svcId는 JS가 pathname에서 읽음)
+    else if (uri.match(/^\/class\/[A-Za-z0-9_-]+$/)) {
+        request.uri = '/class.html';
+    }
     // /app  →  /get-app.html  (short alias; no app.html exists)
     else if (uri === '/app') {
         request.uri = '/get-app.html';
