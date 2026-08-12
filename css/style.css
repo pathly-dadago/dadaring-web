@@ -18,6 +18,10 @@
   --font-kr: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
 }
 
+/* hidden 속성이 display 를 지정한 규칙(.invite-kakao-hint 등)에 덮이지 않게 —
+   invite.html/class.html 의 카카오 힌트가 항상 노출되던 버그의 근본 수정. */
+[hidden] { display: none !important; }
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html { scroll-behavior: smooth; }
