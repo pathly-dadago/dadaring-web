@@ -119,14 +119,37 @@
     openApp.href = deepLinkUrl;
     if (isKakao) {
       document.getElementById('kakao-hint').hidden = false;
-      // 카카오톡 인앱 웹뷰는 intent:// 를 차단 — 클릭 시 시스템 브라우저로
-      // 자기 자신을 다시 열어 거기서 딥링크를 발사한다. (초대 페이지와 달리
-      // 내용을 먼저 보여줘야 하므로 자동 전환은 하지 않는다.)
+      // 카카오톡 인앱 웹뷰는 intent:// 를 차단 — 시스템 브라우저로 자기
+      // 자신을 다시 열어 거기서 자동 분기가 이어진다(2026-08-13, 초대
+      // 페이지와 동일한 자동 전환 — 공유 '문구'에 클래스 요약이 이미
+      // 있어서 즉시 넘어가도 정보 손실이 없다).
       openApp.addEventListener('click', function (e) {
         e.preventDefault();
         window.location.href = 'kakaotalk://web/openExternal?url='
           + encodeURIComponent(window.location.href.split('#')[0]);
       });
+      window.location.href = 'kakaotalk://web/openExternal?url='
+        + encodeURIComponent(window.location.href.split('#')[0]);
+    } else if (svcId && (isAndroid || isIOS)) {
+      // 자동 분기(2026-08-13 사용자 요청): 앱 설치 → 앱의 해당 클래스로
+      // 직행, 미설치 → 스토어로. Android 는 intent:// 가 스스로 Play
+      // 폴백까지 처리하고, iOS 는 스킴 시도 후 4초 내 전환이 없으면
+      // App Store 로 보낸다(앱이 열렸으면 document.hidden 으로 감지).
+      var STORE_FALLBACK_MS = 4000;
+      setTimeout(function () {
+        if (isAndroid) {
+          window.location.href = deepLinkUrl;
+        } else {
+          var iframe = document.createElement('iframe');
+          iframe.style.display = 'none';
+          iframe.src = iosSchemeUrl;
+          document.body.appendChild(iframe);
+          setTimeout(function () {
+            if (document.hidden) return;
+            window.location.replace(appleUrl);
+          }, STORE_FALLBACK_MS);
+        }
+      }, 0);
     }
 
     function fmtDate(iso, withTime) {
