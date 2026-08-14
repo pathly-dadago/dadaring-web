@@ -914,14 +914,17 @@ function koreaBubbleMap(bySido, unknown) {
     const c = counts[name] || 0;
     if (c) {
       // 숫자 가독성(2026-08-14 사용자 피드백): 진한 초록 원 + 흰색 굵은
-      // 숫자(크게), 시도 라벨도 진하게 — 연한 원+어두운 숫자는 배경과 섞임.
+      // 숫자(크게), 시도 라벨도 진하게. ⚠️반드시 인라인 style 로 —
+      // `.scard svg text{font-size:9px;fill:var(--ts)}` 전역 CSS 가 SVG
+      // 프레젠테이션 속성(font-size/fill 어트리뷰트)을 덮어써 회색 9px 로
+      // 렌더된다(어트리뷰트는 어떤 CSS 규칙에도 진다 — 인라인만 이긴다).
       const r = 11 + 20 * Math.sqrt(c / max);
       s += `<circle cx="${p.x}" cy="${p.y}" r="${r.toFixed(1)}" fill="#2A8F55" fill-opacity="0.9" stroke="#1B5E3A" stroke-width="1.2"/>`
-         + `<text x="${p.x}" y="${p.y + 5.5}" text-anchor="middle" font-size="16" font-weight="800" fill="#fff">${c}</text>`
-         + `<text x="${p.x}" y="${p.y - r - 4}" text-anchor="middle" font-size="11" font-weight="700" fill="#2D3436">${p.label}</text>`;
+         + `<text x="${p.x}" y="${p.y + 6}" text-anchor="middle" style="font-size:17px;font-weight:800;fill:#fff">${c}</text>`
+         + `<text x="${p.x}" y="${p.y - r - 4}" text-anchor="middle" style="font-size:12px;font-weight:700;fill:#2D3436">${p.label}</text>`;
     } else {
       s += `<circle cx="${p.x}" cy="${p.y}" r="1.6" fill="#9FB3A7"/>`
-         + `<text x="${p.x}" y="${p.y - 5}" text-anchor="middle" font-size="9" fill="#8E9AAB">${p.label}</text>`;
+         + `<text x="${p.x}" y="${p.y - 5}" text-anchor="middle" style="font-size:9.5px;fill:#8E9AAB">${p.label}</text>`;
     }
   }
   s += '</svg>';
