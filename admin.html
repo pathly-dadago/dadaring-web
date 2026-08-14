@@ -1048,8 +1048,13 @@ function renderStats() {
   const a = data.active || {};
   const kpi = (label, val, sub) => `<div class="kpi"><div class="kl">${label}</div>` +
     `<div class="kv">${val}</div><div class="ks">${sub}</div></div>`;
+  // 앱모드 분포(2026-08-14) — BE signups.byAppMode. 신버전 FE 가 동기화한
+  // 사용자만 집계되므로(미동기=unset) 있을 때만 표기.
+  const am = data.signups?.byAppMode;
+  const amNote = am && (am.parent || am.student)
+    ? ` · 부모 ${fmtInt(am.parent)} · 학생 ${fmtInt(am.student)}` : '';
   const kpis =
-      kpi('총 가입자', fmtInt(total), `기간 신규 +${fmtInt(newInPeriod)}`)
+      kpi('총 가입자', fmtInt(total), `기간 신규 +${fmtInt(newInPeriod)}${amNote}`)
     + kpi('DAU (오늘)', fmtInt(a.dauToday), `AI 활성 ${fmtInt(a.aiDauToday)}`)
     + kpi('WAU (7일)', fmtInt(a.wau), `AI 활성 ${fmtInt(a.aiWau)}`)
     + kpi('MAU (30일)', fmtInt(a.mau), `AI 활성 ${fmtInt(a.aiMau)}`);
