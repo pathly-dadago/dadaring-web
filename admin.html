@@ -1070,8 +1070,10 @@ function renderStats() {
     <div class="scard"><h2>광고 노출·클릭 (${UNIT_LABEL[statsUnit]})${adTotalNote}</h2>
       ${barLineChart(adRows, 'imp', 'clk')}
       ${adRows.length ? legend([['#7FD6A4', '노출 (좌축)'], ['#35A866', '클릭 (우축)']]) : ''}</div>
-    <div class="scard"><h2>기능별 AI 사용${featWindowNote()}</h2>${featHtml}</div>
-    <div class="scard"><h2>저장공간 (사진) — 총 ${fmtBytes(stor.total)}</h2>${storHtml}</div>`;
+    <div class="chart-2col">
+      <div class="scard"><h2>기능별 AI 사용${featWindowNote()}</h2>${featHtml}</div>
+      <div class="scard"><h2>저장공간 (사진) — 총 ${fmtBytes(stor.total)}</h2>${storHtml}</div>
+    </div>`;
 }
 
 async function enter() {
