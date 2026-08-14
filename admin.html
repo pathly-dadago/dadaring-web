@@ -930,9 +930,9 @@ function koreaBubbleMap(bySido, unknown) {
   return s; // 입력/미입력 주석은 카드 서브타이틀(renderStats)에서
 }
 
-// 아이 나이 분포(2026-08-14, 세로 막대 개편 — 사용자 요청): x축=출생년도
-// (연속 축, 없는 해는 0), y축=아이 수. x 라벨은 10으로 나눠지는 출생년도
-// (2010/2020…)만 년도로, 나머지는 나이 숫자만. ⚠️SVG 텍스트는 인라인
+// 아이 나이 분포(2026-08-14, 축 교환 — 지역 버블맵과 카드 높이 정렬):
+// 세로축=나이(어린 순, 출생년도 연속), 가로축=아이 수. 왼쪽 라벨은 나이
+// 전 칸+10으로 나눠지는 출생년도만 굵게 병기. ⚠️SVG 텍스트는 인라인
 // style 필수(.scard svg text 전역 CSS 가 속성을 덮음).
 function childAgesChart(ages) {
   const byYear = ages?.byBirthYear || {};
@@ -940,36 +940,35 @@ function childAgesChart(ages) {
   if (!years.length)
     return '<div style="font-size:13px;color:var(--ts);padding:20px 0;text-align:center">나이 정보가 아직 없어요</div>';
   const minY = Math.min(...years), maxY = Math.max(...years);
-  const axis = []; // 어린(최근년) 왼쪽 → 나이 많은 순
-  for (let y = maxY; y >= minY; y--) axis.push(y);
+  const axis = [];
+  for (let y = maxY; y >= minY; y--) axis.push(y); // 어린(최근년) 위 → 아래로
   const thisYear = Number(todayKST().slice(0, 4));
   const max = Math.max(1, ...axis.map(y => byYear[y] || 0));
-  const W = 460, H = 206, L = 26, B = 36, T = 16; // T: 숫자 잘림 방지, B: x축 2줄(나이+년도)
-  const plotW = W - L - 6, plotH = H - T - B;
-  const bw = Math.min(22, plotW / axis.length * 0.7);
-  const xc = i => L + plotW * (i + 0.5) / axis.length;
+  const W = 460, L = 76, R = 26, T = 18, rowH = Math.max(17, Math.min(22, 420 / axis.length));
+  const H = T + axis.length * rowH + 8;
+  const plotW = W - L - R;
   let sv = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
-  // y 그리드(0/절반/최대)
+  // 세로 그리드(0/절반/최대) + 상단 카운트 라벨
   for (const v of [0, Math.ceil(max / 2), max]) {
-    const y = T + plotH * (1 - v / max);
-    sv += `<line x1="${L}" y1="${y}" x2="${W - 6}" y2="${y}" stroke="#E3EFE8" stroke-width="1"/>`
-       + `<text x="${L - 4}" y="${y + 3}" text-anchor="end" style="font-size:9px;fill:#8E9AAB">${v}</text>`;
+    const x = L + plotW * v / max;
+    sv += `<line x1="${x.toFixed(1)}" y1="${T - 4}" x2="${x.toFixed(1)}" y2="${H - 6}" stroke="#E3EFE8" stroke-width="1"/>`
+       + `<text x="${x.toFixed(1)}" y="${T - 8}" text-anchor="middle" style="font-size:9px;fill:#8E9AAB">${v}</text>`;
   }
   axis.forEach((y, i) => {
     const c = byYear[y] || 0;
+    const cy = T + rowH * (i + 0.5);
+    const decade = y % 10 === 0;
+    // 왼쪽 라벨: 나이(전 칸) + 10단위 출생년도 굵게 병기
+    if (decade)
+      sv += `<text x="8" y="${(cy + 3).toFixed(1)}" text-anchor="start" style="font-size:9.5px;font-weight:700;fill:#2D3436">${y}</text>`;
+    sv += `<text x="${L - 8}" y="${(cy + 3).toFixed(1)}" text-anchor="end" style="font-size:9.5px;fill:${decade ? '#2D3436' : '#8E9AAB'};font-weight:${decade ? 700 : 400}">${thisYear - y}세</text>`;
     if (c) {
-      const h = plotH * c / max;
-      sv += `<rect x="${(xc(i) - bw / 2).toFixed(1)}" y="${(T + plotH - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="#35A866"/>`
-         + `<text x="${xc(i).toFixed(1)}" y="${(T + plotH - h - 4).toFixed(1)}" text-anchor="middle" style="font-size:10px;font-weight:700;fill:#2A8F55">${c}</text>`;
-    }
-    // x 라벨 2줄(2026-08-14 사용자 결정) — 윗줄: 나이(전 칸), 아랫줄:
-    // 10으로 나눠지는 출생년도(2010/2020…)만 굵게.
-    sv += `<text x="${xc(i).toFixed(1)}" y="${H - 22}" text-anchor="middle" style="font-size:9px;fill:#8E9AAB">${thisYear - y}</text>`;
-    if (y % 10 === 0) {
-      sv += `<text x="${xc(i).toFixed(1)}" y="${H - 8}" text-anchor="middle" style="font-size:9.5px;font-weight:700;fill:#2D3436">${y}</text>`;
+      const w = Math.max(3, plotW * c / max);
+      const bh = Math.min(12, rowH - 5);
+      sv += `<rect x="${L}" y="${(cy - bh / 2).toFixed(1)}" width="${w.toFixed(1)}" height="${bh}" rx="3" fill="#35A866"/>`
+         + `<text x="${(L + w + 5).toFixed(1)}" y="${(cy + 3).toFixed(1)}" text-anchor="start" style="font-size:10px;font-weight:700;fill:#2A8F55">${c}</text>`;
     }
   });
-  sv += `<text x="${L - 4}" y="${H - 22}" text-anchor="end" style="font-size:8.5px;fill:#B9C6BE">나이</text>`;
   return sv + '</svg>';
 }
 
