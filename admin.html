@@ -923,7 +923,8 @@ function koreaBubbleMap(bySido, unknown) {
     }
   }
   s += '</svg>';
-  const note = `지역 입력 ${fmtInt(withRegion)}명` + (unknown ? ` · 미입력 ${fmtInt(unknown)}명` : '');
+  // 입력/미입력 수는 항상 둘 다 표기(2026-08-14 사용자 요청 — 0명이어도).
+  const note = `지역 입력 ${fmtInt(withRegion)}명 · 미입력 ${fmtInt(unknown || 0)}명`;
   return s + `<div style="text-align:center;font-size:12px;color:var(--ts);margin-top:4px">${note}</div>`;
 }
 
