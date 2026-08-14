@@ -222,6 +222,7 @@
     .feat .ffill{background:var(--green);height:100%;border-radius:6px;}
     /* 데스크톱: 가입/활성 추이를 1행 2열로 */
     .chart-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:860px;}
+    .scard-sub{font-size:12px;color:var(--ts);margin:2px 0 10px;}
     .chart-2col .scard{max-width:none;margin-bottom:0;}
     /* 우상단 툴바 (새로고침 · 홈페이지) */
     .topbar{position:fixed;top:12px;right:18px;display:flex;gap:8px;z-index:50;}
@@ -896,12 +897,10 @@ const SIDO_ALIAS = { '강원도': '강원특별자치도', '전라북도': '전�
 
 function koreaBubbleMap(bySido, unknown) {
   const counts = {};
-  let withRegion = 0;
   for (const [k, v] of Object.entries(bySido || {})) {
     const key = SIDO_POS[k] ? k : SIDO_ALIAS[k];
-    if (!key) continue; // 알 수 없는 표기는 미표기(합계 주석에만 반영)
+    if (!key) continue; // 알 수 없는 표기는 지도 미표기(서브타이틀 합계에는 포함)
     counts[key] = (counts[key] || 0) + Number(v);
-    withRegion += Number(v);
   }
   const max = Math.max(1, ...Object.values(counts));
   // 본토 실루엣(간이) + 제주 — 정밀 지도가 아니라 위치 감각용.
@@ -928,30 +927,47 @@ function koreaBubbleMap(bySido, unknown) {
     }
   }
   s += '</svg>';
-  // 입력/미입력 수는 항상 둘 다 표기(2026-08-14 사용자 요청 — 0명이어도).
-  const note = `지역 입력 ${fmtInt(withRegion)}명 · 미입력 ${fmtInt(unknown || 0)}명`;
-  return s + `<div style="text-align:center;font-size:12px;color:var(--ts);margin-top:4px">${note}</div>`;
+  return s; // 입력/미입력 주석은 카드 서브타이틀(renderStats)에서
 }
 
-// 아이 나이 분포(2026-08-14) — BE childAges.byBirthYear(출생년도별 수)를
-// 연나이(올해-출생년) 막대로. 기능별 AI 사용과 같은 컴팩트 가로 막대 스타일.
+// 아이 나이 분포(2026-08-14, 세로 막대 개편 — 사용자 요청): x축=출생년도
+// (연속 축, 없는 해는 0), y축=아이 수. x 라벨은 10으로 나눠지는 출생년도
+// (2010/2020…)만 년도로, 나머지는 나이 숫자만. ⚠️SVG 텍스트는 인라인
+// style 필수(.scard svg text 전역 CSS 가 속성을 덮음).
 function childAgesChart(ages) {
   const byYear = ages?.byBirthYear || {};
-  const years = Object.keys(byYear).sort((a, b) => Number(b) - Number(a)); // 어린 순
+  const years = Object.keys(byYear).map(Number).filter(y => y > 1900);
   if (!years.length)
     return '<div style="font-size:13px;color:var(--ts);padding:20px 0;text-align:center">나이 정보가 아직 없어요</div>';
+  const minY = Math.min(...years), maxY = Math.max(...years);
+  const axis = []; // 어린(최근년) 왼쪽 → 나이 많은 순
+  for (let y = maxY; y >= minY; y--) axis.push(y);
   const thisYear = Number(todayKST().slice(0, 4));
-  const max = Math.max(1, ...years.map(y => byYear[y]));
-  let s = '<div class="feat">'; // .frow/.ftrack 스타일이 .feat 스코프
-  for (const y of years) {
-    const age = thisYear - Number(y);
-    s += `<div class="frow">
-      <div class="fl">${age}세 (${y}년생) · ${fmtInt(byYear[y])}명</div>
-      <div class="ftrack"><div class="ffill" style="width:${Math.max(2, Math.round(byYear[y] / max * 100))}%"></div></div></div>`;
+  const max = Math.max(1, ...axis.map(y => byYear[y] || 0));
+  const W = 460, H = 196, L = 26, B = 26, T = 16; // T: 최대 막대 위 숫자 잘림 방지
+  const plotW = W - L - 6, plotH = H - T - B;
+  const bw = Math.min(22, plotW / axis.length * 0.7);
+  const xc = i => L + plotW * (i + 0.5) / axis.length;
+  let sv = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
+  // y 그리드(0/절반/최대)
+  for (const v of [0, Math.ceil(max / 2), max]) {
+    const y = T + plotH * (1 - v / max);
+    sv += `<line x1="${L}" y1="${y}" x2="${W - 6}" y2="${y}" stroke="#E3EFE8" stroke-width="1"/>`
+       + `<text x="${L - 4}" y="${y + 3}" text-anchor="end" style="font-size:9px;fill:#8E9AAB">${v}</text>`;
   }
-  s += '</div>';
-  const note = `나이 입력 ${fmtInt((ages?.total || 0) - (ages?.unknown || 0))}명 · 미입력 ${fmtInt(ages?.unknown || 0)}명`;
-  return s + `<div style="text-align:center;font-size:12px;color:var(--ts);margin-top:8px">${note}</div>`;
+  axis.forEach((y, i) => {
+    const c = byYear[y] || 0;
+    if (c) {
+      const h = plotH * c / max;
+      sv += `<rect x="${(xc(i) - bw / 2).toFixed(1)}" y="${(T + plotH - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="#35A866"/>`
+         + `<text x="${xc(i).toFixed(1)}" y="${(T + plotH - h - 4).toFixed(1)}" text-anchor="middle" style="font-size:10px;font-weight:700;fill:#2A8F55">${c}</text>`;
+    }
+    // x 라벨 — 10단위 출생년도만 년도, 나머지는 나이 숫자
+    const decade = y % 10 === 0;
+    sv += `<text x="${xc(i).toFixed(1)}" y="${H - 12}" text-anchor="middle" style="font-size:${decade ? 9.5 : 9}px;font-weight:${decade ? 700 : 400};fill:${decade ? '#2D3436' : '#8E9AAB'}">${decade ? y : thisYear - y}</text>`;
+  });
+  sv += `<text x="${L - 4}" y="${H - 12}" text-anchor="end" style="font-size:8.5px;fill:#B9C6BE">나이</text>`;
+  return sv + '</svg>';
 }
 
 const FEATURE_NAMES = { notice: '📋 알림장', diary: '📔 일기', ar: '📚 AR 독서',
@@ -1086,8 +1102,10 @@ function renderStats() {
     </div>
     <div class="chart-2col">
       <div class="scard"><h2>아이 나이 분포 (전체 ${fmtInt(data.childAges?.total || 0)}명)</h2>
+        <div class="scard-sub">나이 입력 ${fmtInt((data.childAges?.total || 0) - (data.childAges?.unknown || 0))}명 · 미입력 ${fmtInt(data.childAges?.unknown || 0)}명</div>
         ${childAgesChart(data.childAges)}</div>
       <div class="scard"><h2>아이 지역 분포 (전체 ${fmtInt(data.childRegions?.total || 0)}명)</h2>
+        <div class="scard-sub">지역 입력 ${fmtInt((data.childRegions?.total || 0) - (data.childRegions?.unknown || 0))}명 · 미입력 ${fmtInt(data.childRegions?.unknown || 0)}명</div>
         ${koreaBubbleMap(data.childRegions?.bySido, data.childRegions?.unknown)}</div>
     </div>
     <div class="chart-2col">
