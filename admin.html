@@ -950,11 +950,16 @@ function childAgesChart(ages) {
   const years = Object.keys(byYear).map(Number).filter(y => y > 1900);
   if (!years.length)
     return '<div style="font-size:13px;color:var(--ts);padding:20px 0;text-align:center">나이 정보가 아직 없어요</div>';
-  const minY = Math.min(...years), maxY = Math.max(...years);
-  const axis = [];
-  for (let y = maxY; y >= minY; y--) axis.push(y); // 어린(최근년) 위 → 아래로
+  // 축 고정(2026-08-14 사용자 결정): 항상 0세~24세 + '25+' 합산 버킷.
   const thisYear = Number(todayKST().slice(0, 4));
-  const max = Math.max(1, ...axis.map(y => byYear[y] || 0));
+  const byAge = {}; // age(0~24) 또는 25(=25+) → count
+  for (const y of years) {
+    const age = Math.min(Math.max(thisYear - y, 0), 25);
+    byAge[age] = (byAge[age] || 0) + byYear[y];
+  }
+  const axis = [];
+  for (let a = 0; a <= 25; a++) axis.push(a);
+  const max = Math.max(1, ...axis.map(a => byAge[a] || 0));
   const W = 460, L = 76, R = 26, T = 18, rowH = Math.max(17, Math.min(22, 420 / axis.length));
   const H = T + axis.length * rowH + 8;
   const plotW = W - L - R;
@@ -965,16 +970,17 @@ function childAgesChart(ages) {
     sv += `<line x1="${x.toFixed(1)}" y1="${T - 4}" x2="${x.toFixed(1)}" y2="${H - 6}" stroke="#E3EFE8" stroke-width="1"/>`
        + `<text x="${x.toFixed(1)}" y="${T - 8}" text-anchor="middle" style="font-size:9px;fill:#8E9AAB">${v}</text>`;
   }
-  axis.forEach((y, i) => {
-    const c = byYear[y] || 0;
+  axis.forEach((a, i) => {
+    const c = byAge[a] || 0;
     const cy = T + rowH * (i + 0.5);
-    const decade = y % 10 === 0;
-    // 왼쪽 라벨: 나이(전 칸) + 10단위 출생년도 굵게 병기
+    const birthYear = thisYear - a; // 25+ 행은 년도 병기 안 함
+    const decade = a < 25 && birthYear % 10 === 0;
+    // 왼쪽 라벨: 나이(전 칸, 25+ 는 합산) + 10단위 출생년도 굵게 병기
     if (decade)
-      sv += `<text x="8" y="${(cy + 3).toFixed(1)}" text-anchor="start" style="font-size:9.5px;font-weight:700;fill:#2D3436">${y}</text>`;
-    sv += `<text x="${L - 8}" y="${(cy + 3).toFixed(1)}" text-anchor="end" style="font-size:9.5px;fill:${decade ? '#2D3436' : '#8E9AAB'};font-weight:${decade ? 700 : 400}">${thisYear - y}세</text>`;
+      sv += `<text x="8" y="${(cy + 3).toFixed(1)}" text-anchor="start" style="font-size:9.5px;font-weight:700;fill:#2D3436">${birthYear}</text>`;
+    sv += `<text x="${L - 8}" y="${(cy + 3).toFixed(1)}" text-anchor="end" style="font-size:9.5px;fill:${decade ? '#2D3436' : '#8E9AAB'};font-weight:${decade ? 700 : 400}">${a === 25 ? '25+' : a + '세'}</text>`;
     if (c) {
-      const st = stageOfAge(thisYear - y);
+      const st = stageOfAge(a);
       const w = Math.max(3, plotW * c / max);
       const bh = Math.min(12, rowH - 5);
       sv += `<rect x="${L}" y="${(cy - bh / 2).toFixed(1)}" width="${w.toFixed(1)}" height="${bh}" rx="3" fill="${st.color}"/>`
