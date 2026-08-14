@@ -944,7 +944,7 @@ function childAgesChart(ages) {
   for (let y = maxY; y >= minY; y--) axis.push(y);
   const thisYear = Number(todayKST().slice(0, 4));
   const max = Math.max(1, ...axis.map(y => byYear[y] || 0));
-  const W = 460, H = 196, L = 26, B = 26, T = 16; // T: 최대 막대 위 숫자 잘림 방지
+  const W = 460, H = 206, L = 26, B = 36, T = 16; // T: 숫자 잘림 방지, B: x축 2줄(나이+년도)
   const plotW = W - L - 6, plotH = H - T - B;
   const bw = Math.min(22, plotW / axis.length * 0.7);
   const xc = i => L + plotW * (i + 0.5) / axis.length;
@@ -962,11 +962,14 @@ function childAgesChart(ages) {
       sv += `<rect x="${(xc(i) - bw / 2).toFixed(1)}" y="${(T + plotH - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="#35A866"/>`
          + `<text x="${xc(i).toFixed(1)}" y="${(T + plotH - h - 4).toFixed(1)}" text-anchor="middle" style="font-size:10px;font-weight:700;fill:#2A8F55">${c}</text>`;
     }
-    // x 라벨 — 10단위 출생년도만 년도, 나머지는 나이 숫자
-    const decade = y % 10 === 0;
-    sv += `<text x="${xc(i).toFixed(1)}" y="${H - 12}" text-anchor="middle" style="font-size:${decade ? 9.5 : 9}px;font-weight:${decade ? 700 : 400};fill:${decade ? '#2D3436' : '#8E9AAB'}">${decade ? y : thisYear - y}</text>`;
+    // x 라벨 2줄(2026-08-14 사용자 결정) — 윗줄: 나이(전 칸), 아랫줄:
+    // 10으로 나눠지는 출생년도(2010/2020…)만 굵게.
+    sv += `<text x="${xc(i).toFixed(1)}" y="${H - 22}" text-anchor="middle" style="font-size:9px;fill:#8E9AAB">${thisYear - y}</text>`;
+    if (y % 10 === 0) {
+      sv += `<text x="${xc(i).toFixed(1)}" y="${H - 8}" text-anchor="middle" style="font-size:9.5px;font-weight:700;fill:#2D3436">${y}</text>`;
+    }
   });
-  sv += `<text x="${L - 4}" y="${H - 12}" text-anchor="end" style="font-size:8.5px;fill:#B9C6BE">나이</text>`;
+  sv += `<text x="${L - 4}" y="${H - 22}" text-anchor="end" style="font-size:8.5px;fill:#B9C6BE">나이</text>`;
   return sv + '</svg>';
 }
 
