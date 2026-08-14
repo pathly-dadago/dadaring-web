@@ -934,6 +934,17 @@ function koreaBubbleMap(bySido, unknown) {
 // 세로축=나이(어린 순, 출생년도 연속), 가로축=아이 수. 왼쪽 라벨은 나이
 // 전 칸+10으로 나눠지는 출생년도만 굵게 병기. ⚠️SVG 텍스트는 인라인
 // style 필수(.scard svg text 전역 CSS 가 속성을 덮음).
+// 학제 구분(2026-08-14 사용자 결정 — 7~12세=초등): 나이 → 단계·색.
+const SCHOOL_STAGES = [
+  { label: '유',  color: '#F0A93B', min: 0,  max: 6 },
+  { label: '초',  color: '#35A866', min: 7,  max: 12 },
+  { label: '중',  color: '#3B82C4', min: 13, max: 15 },
+  { label: '고',  color: '#8A63C9', min: 16, max: 18 },
+  { label: '대+', color: '#7A8894', min: 19, max: 200 },
+];
+const stageOfAge = age =>
+  SCHOOL_STAGES.find(st => age >= st.min && age <= st.max) || SCHOOL_STAGES[4];
+
 function childAgesChart(ages) {
   const byYear = ages?.byBirthYear || {};
   const years = Object.keys(byYear).map(Number).filter(y => y > 1900);
@@ -963,13 +974,18 @@ function childAgesChart(ages) {
       sv += `<text x="8" y="${(cy + 3).toFixed(1)}" text-anchor="start" style="font-size:9.5px;font-weight:700;fill:#2D3436">${y}</text>`;
     sv += `<text x="${L - 8}" y="${(cy + 3).toFixed(1)}" text-anchor="end" style="font-size:9.5px;fill:${decade ? '#2D3436' : '#8E9AAB'};font-weight:${decade ? 700 : 400}">${thisYear - y}세</text>`;
     if (c) {
+      const st = stageOfAge(thisYear - y);
       const w = Math.max(3, plotW * c / max);
       const bh = Math.min(12, rowH - 5);
-      sv += `<rect x="${L}" y="${(cy - bh / 2).toFixed(1)}" width="${w.toFixed(1)}" height="${bh}" rx="3" fill="#35A866"/>`
-         + `<text x="${(L + w + 5).toFixed(1)}" y="${(cy + 3).toFixed(1)}" text-anchor="start" style="font-size:10px;font-weight:700;fill:#2A8F55">${c}</text>`;
+      sv += `<rect x="${L}" y="${(cy - bh / 2).toFixed(1)}" width="${w.toFixed(1)}" height="${bh}" rx="3" fill="${st.color}"/>`
+         + `<text x="${(L + w + 5).toFixed(1)}" y="${(cy + 3).toFixed(1)}" text-anchor="start" style="font-size:10px;font-weight:700;fill:${st.color}">${c}</text>`;
     }
   });
-  return sv + '</svg>';
+  // 학제 범례 — 그래프 아래 한 줄
+  const legend = SCHOOL_STAGES.map(st =>
+    `<span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px;font-size:11.5px;color:var(--ts)">` +
+    `<span style="width:9px;height:9px;border-radius:3px;background:${st.color};display:inline-block"></span>${st.label}</span>`).join('');
+  return sv + '</svg>' + `<div style="margin-top:6px;text-align:center">${legend}</div>`;
 }
 
 const FEATURE_NAMES = { notice: '📋 알림장', diary: '📔 일기', ar: '📚 AR 독서',
