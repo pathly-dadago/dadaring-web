@@ -869,6 +869,64 @@ function stackedBarChart(rows) {
   return s + xLabelsSvg(rows) + '</svg>';
 }
 
+// 아이 지역 버블맵 — 시도별 아이 수를 대한민국 실루엣 위 원 크기로 표기.
+// 좌표는 시도 중심 근사값을 viewBox(360×480)로 사영한 고정값.
+const SIDO_POS = {
+  '서울특별시':       { x: 118, y: 110, label: '서울' },
+  '인천광역시':       { x: 82,  y: 128, label: '인천' },
+  '경기도':           { x: 150, y: 132, label: '경기' },
+  '강원특별자치도':   { x: 220, y: 91,  label: '강원' },
+  '충청북도':         { x: 180, y: 172, label: '충북' },
+  '세종특별자치시':   { x: 128, y: 200, label: '세종' },
+  '대전광역시':       { x: 155, y: 214, label: '대전' },
+  '충청남도':         { x: 92,  y: 186, label: '충남' },
+  '경상북도':         { x: 262, y: 194, label: '경북' },
+  '대구광역시':       { x: 240, y: 244, label: '대구' },
+  '울산광역시':       { x: 296, y: 268, label: '울산' },
+  '부산광역시':       { x: 280, y: 298, label: '부산' },
+  '경상남도':         { x: 214, y: 284, label: '경남' },
+  '전북특별자치도':   { x: 128, y: 254, label: '전북' },
+  '광주광역시':       { x: 106, y: 298, label: '광주' },
+  '전라남도':         { x: 112, y: 332, label: '전남' },
+  '제주특별자치도':   { x: 77,  y: 436, label: '제주' },
+};
+// 구명(강원도·전라북도) 저장분도 합산 — 아이 등록 시점에 따라 혼재 가능.
+const SIDO_ALIAS = { '강원도': '강원특별자치도', '전라북도': '전북특별자치도',
+                     '제주도': '제주특별자치도', '세종시': '세종특별자치시' };
+
+function koreaBubbleMap(bySido, unknown) {
+  const counts = {};
+  let withRegion = 0;
+  for (const [k, v] of Object.entries(bySido || {})) {
+    const key = SIDO_POS[k] ? k : SIDO_ALIAS[k];
+    if (!key) continue; // 알 수 없는 표기는 미표기(합계 주석에만 반영)
+    counts[key] = (counts[key] || 0) + Number(v);
+    withRegion += Number(v);
+  }
+  const max = Math.max(1, ...Object.values(counts));
+  // 본토 실루엣(간이) + 제주 — 정밀 지도가 아니라 위치 감각용.
+  let s = `<svg viewBox="0 0 360 480" style="width:100%;max-width:340px;display:block;margin:0 auto">
+    <path d="M92,51 L160,38 L229,28 L262,60 L278,95 L307,122 L322,180 L328,232 L320,279 L299,307
+             L250,323 L212,334 L176,342 L140,352 L94,366 L61,326 L74,280 L86,232 L49,177 L82,122 Z"
+          fill="#EAF7F0" stroke="#B9E3CC" stroke-width="1.5" stroke-linejoin="round"/>
+    <ellipse cx="77" cy="436" rx="32" ry="13" fill="#EAF7F0" stroke="#B9E3CC" stroke-width="1.5"/>`;
+  for (const [name, p] of Object.entries(SIDO_POS)) {
+    const c = counts[name] || 0;
+    if (c) {
+      const r = 8 + 20 * Math.sqrt(c / max);
+      s += `<circle cx="${p.x}" cy="${p.y}" r="${r.toFixed(1)}" fill="#35A866" fill-opacity="0.55" stroke="#2A8F55"/>`
+         + `<text x="${p.x}" y="${p.y + 4}" text-anchor="middle" font-size="13" font-weight="700" fill="#1B5E3A">${c}</text>`
+         + `<text x="${p.x}" y="${p.y - r - 3}" text-anchor="middle" font-size="9" fill="#5B8A6F">${p.label}</text>`;
+    } else {
+      s += `<circle cx="${p.x}" cy="${p.y}" r="1.6" fill="#B9C6BE"/>`
+         + `<text x="${p.x}" y="${p.y - 5}" text-anchor="middle" font-size="8" fill="#B9C6BE">${p.label}</text>`;
+    }
+  }
+  s += '</svg>';
+  const note = `지역 입력 ${fmtInt(withRegion)}명` + (unknown ? ` · 미입력 ${fmtInt(unknown)}명` : '');
+  return s + `<div style="text-align:center;font-size:12px;color:var(--ts);margin-top:4px">${note}</div>`;
+}
+
 const FEATURE_NAMES = { notice: '📋 알림장', diary: '📔 일기', ar: '📚 AR 독서',
                         todo: '✅ 할일 AI', tuition: '💰 학원비',
                         class_reco: '🏫 클래스 추천',
@@ -999,11 +1057,15 @@ function renderStats() {
         ${twoLineChart(acRows, 'app', 'ai')}
         ${acRows.length ? legend([['#35A866', '접속 (실선)'], ['#43C67A', 'AI 사용 (점선)']]) : ''}</div>
     </div>
-    <div class="scard"><h2>AI 토큰 — 티어별 (${UNIT_LABEL[statsUnit]})</h2>
-      <table class="tier"><thead><tr><th>티어</th><th>사용자</th><th>총 토큰</th><th>평균 월환산</th><th>캡 대비</th></tr></thead>
-      <tbody>${tierRows}</tbody></table>
-      ${stackedBarChart(tkRows)}
-      ${tkRows.length ? legend(TIER_SEGS.map(s => [s.color, s.label])) : ''}</div>
+    <div class="chart-2col">
+      <div class="scard"><h2>AI 토큰 — 티어별 (${UNIT_LABEL[statsUnit]})</h2>
+        <table class="tier"><thead><tr><th>티어</th><th>사용자</th><th>총 토큰</th><th>평균 월환산</th><th>캡 대비</th></tr></thead>
+        <tbody>${tierRows}</tbody></table>
+        ${stackedBarChart(tkRows)}
+        ${tkRows.length ? legend(TIER_SEGS.map(s => [s.color, s.label])) : ''}</div>
+      <div class="scard"><h2>아이 지역 분포 (전체 ${fmtInt(data.childRegions?.total || 0)}명)</h2>
+        ${koreaBubbleMap(data.childRegions?.bySido, data.childRegions?.unknown)}</div>
+    </div>
     <div class="scard"><h2>광고 노출·클릭 (${UNIT_LABEL[statsUnit]})${adTotalNote}</h2>
       ${barLineChart(adRows, 'imp', 'clk')}
       ${adRows.length ? legend([['#7FD6A4', '노출 (좌축)'], ['#35A866', '클릭 (우축)']]) : ''}</div>
