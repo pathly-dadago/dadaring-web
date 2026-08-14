@@ -933,6 +933,27 @@ function koreaBubbleMap(bySido, unknown) {
   return s + `<div style="text-align:center;font-size:12px;color:var(--ts);margin-top:4px">${note}</div>`;
 }
 
+// 아이 나이 분포(2026-08-14) — BE childAges.byBirthYear(출생년도별 수)를
+// 연나이(올해-출생년) 막대로. 기능별 AI 사용과 같은 컴팩트 가로 막대 스타일.
+function childAgesChart(ages) {
+  const byYear = ages?.byBirthYear || {};
+  const years = Object.keys(byYear).sort((a, b) => Number(b) - Number(a)); // 어린 순
+  if (!years.length)
+    return '<div style="font-size:13px;color:var(--ts);padding:20px 0;text-align:center">나이 정보가 아직 없어요</div>';
+  const thisYear = Number(todayKST().slice(0, 4));
+  const max = Math.max(1, ...years.map(y => byYear[y]));
+  let s = '<div class="feat">'; // .frow/.ftrack 스타일이 .feat 스코프
+  for (const y of years) {
+    const age = thisYear - Number(y);
+    s += `<div class="frow">
+      <div class="fl">${age}세 (${y}년생) · ${fmtInt(byYear[y])}명</div>
+      <div class="ftrack"><div class="ffill" style="width:${Math.max(2, Math.round(byYear[y] / max * 100))}%"></div></div></div>`;
+  }
+  s += '</div>';
+  const note = `나이 입력 ${fmtInt((ages?.total || 0) - (ages?.unknown || 0))}명 · 미입력 ${fmtInt(ages?.unknown || 0)}명`;
+  return s + `<div style="text-align:center;font-size:12px;color:var(--ts);margin-top:8px">${note}</div>`;
+}
+
 const FEATURE_NAMES = { notice: '📋 알림장', diary: '📔 일기', ar: '📚 AR 독서',
                         todo: '✅ 할일 AI', tuition: '💰 학원비',
                         class_reco: '🏫 클래스 추천',
@@ -1064,17 +1085,21 @@ function renderStats() {
         ${acRows.length ? legend([['#35A866', '접속 (실선)'], ['#43C67A', 'AI 사용 (점선)']]) : ''}</div>
     </div>
     <div class="chart-2col">
+      <div class="scard"><h2>아이 나이 분포 (전체 ${fmtInt(data.childAges?.total || 0)}명)</h2>
+        ${childAgesChart(data.childAges)}</div>
+      <div class="scard"><h2>아이 지역 분포 (전체 ${fmtInt(data.childRegions?.total || 0)}명)</h2>
+        ${koreaBubbleMap(data.childRegions?.bySido, data.childRegions?.unknown)}</div>
+    </div>
+    <div class="chart-2col">
       <div class="scard"><h2>AI 토큰 — 티어별 (${UNIT_LABEL[statsUnit]})</h2>
         <table class="tier"><thead><tr><th>티어</th><th>사용자</th><th>총 토큰</th><th>평균 월환산</th><th>캡 대비</th></tr></thead>
         <tbody>${tierRows}</tbody></table>
         ${stackedBarChart(tkRows)}
         ${tkRows.length ? legend(TIER_SEGS.map(s => [s.color, s.label])) : ''}</div>
-      <div class="scard"><h2>아이 지역 분포 (전체 ${fmtInt(data.childRegions?.total || 0)}명)</h2>
-        ${koreaBubbleMap(data.childRegions?.bySido, data.childRegions?.unknown)}</div>
+      <div class="scard"><h2>광고 노출·클릭 (${UNIT_LABEL[statsUnit]})${adTotalNote}</h2>
+        ${barLineChart(adRows, 'imp', 'clk')}
+        ${adRows.length ? legend([['#7FD6A4', '노출 (좌축)'], ['#35A866', '클릭 (우축)']]) : ''}</div>
     </div>
-    <div class="scard"><h2>광고 노출·클릭 (${UNIT_LABEL[statsUnit]})${adTotalNote}</h2>
-      ${barLineChart(adRows, 'imp', 'clk')}
-      ${adRows.length ? legend([['#7FD6A4', '노출 (좌축)'], ['#35A866', '클릭 (우축)']]) : ''}</div>
     <div class="chart-2col">
       <div class="scard"><h2>기능별 AI 사용${featWindowNote()}</h2>${featHtml}</div>
       <div class="scard"><h2>저장공간 (사진) — 총 ${fmtBytes(stor.total)}</h2>${storHtml}</div>
