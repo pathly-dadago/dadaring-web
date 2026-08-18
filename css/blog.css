@@ -146,3 +146,38 @@
   font-size: 14px;
   color: var(--text-secondary);
 }
+
+/* ── FAQ 아코디언 ─────────────────────────────────────────── */
+.faq-item {
+  border: 1px solid var(--divider, #D8F0E3);
+  border-radius: 14px;
+  background: #fff;
+  margin: 12px 0;
+  overflow: hidden;
+}
+.faq-item summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 18px 52px 18px 20px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary, #2D3436);
+  position: relative;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: "+";
+  position: absolute;
+  right: 20px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 22px; font-weight: 700;
+  color: var(--primary-dark, #35A866);
+}
+.faq-item[open] summary::after { content: "−"; }
+.faq-item .faq-a { padding: 0 20px 20px; }
+.faq-item .faq-a p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--text-secondary, #5E7468);
+}
