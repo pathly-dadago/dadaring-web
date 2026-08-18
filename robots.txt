@@ -7,4 +7,7 @@ Disallow: /invite.html
 Disallow: /delete-account
 Disallow: /delete-account.html
 
+# LLM·AI 검색용 사이트 요약 (llmstxt.org 규약)
+# https://www.dadaring.com/llms.txt
+
 Sitemap: https://www.dadaring.com/sitemap.xml

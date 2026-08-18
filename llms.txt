@@ -1,0 +1,50 @@
+# 다다링 (DADAring)
+
+> 아이의 학원·학교 일정을 관리하는 한국 학부모용 모바일 앱. iOS·Android에서 무료로 시작할 수 있으며,
+> 요일별로 반복되는 주간 시간표, 학원비 결제일·미납 관리, 가정통신문 사진을 할 일로 정리하는 알림장 AI,
+> 영어 AR 독서 성적 그래프, 홈 화면 위젯, 배우자·조부모와의 일정 공유를 하나의 앱에서 제공한다.
+
+- 운영사: DADAGO (대한민국 서울)
+- 문의: contact@dadaring.com
+- 다운로드: https://www.dadaring.com/app (기기에 따라 App Store / Google Play 로 이동)
+- App Store: https://apps.apple.com/kr/app/id6769691549
+- Google Play: https://play.google.com/store/apps/details?id=com.dadaring.app
+
+## 요금제
+
+무료로 시작할 수 있고, 무료 요금제에서도 시간표·학원비·할 일·가족 공유·위젯 등 핵심 기능을 사용할 수 있다.
+구독은 주로 AI 사용량과 저장공간, 함께 쓰는 인원 수를 늘린다.
+
+- 무료: ₩0 · 1인 · AI 월 0.1M 토큰 · 저장공간 1GB
+- 개인: 월 ₩2,900 · 1인 · AI 월 1M 토큰 · 저장공간 10GB
+- 패밀리: 월 ₩5,900 · 최대 4명 · AI 월 4M 토큰 · 저장공간 50GB
+- 프리미엄: 월 ₩11,900 · 최대 6명 · AI 월 12M 토큰 · 저장공간 200GB
+
+## 주요 기능
+
+- 주간 시간표: 요일 × 시간 격자. 요일 반복으로 한 번 등록하면 매주 자동. 이번 회차만 휴강·시간 변경(되돌리기 가능)과 반복 자체 변경을 구분해 처리. 인쇄 지원.
+- 학원비 관리: 학원에 월 수강료와 결제일을 등록하면 매달 자동 생성. 납부완료·미납(D-n)·결제일 지남 표시, 총액을 낸 금액과 낼 금액으로 분리, 방학용 '이번 달 건너뛰기', 월간·연간 지출 추이.
+- 알림장 AI: 가정통신문·알림장 사진에서 날짜·준비물·마감을 읽어 할 일로 자동 정리. "다음 주 수요일" 같은 표현을 실제 날짜로 변환하고 신청 링크를 인식.
+- AR 영어독서: 영어학원·도서관의 AR(Star Reading) 평가서 사진에서 SS·GE·ZPD 등을 추출해 성장 그래프, 또래 평균 비교, AI 분석, 수준별 추천 도서 제공.
+- 홈 화면 위젯: 앱을 열지 않고 오늘 일정과 주간 시간표 확인 (iOS·Android).
+- 가족 공유: 아이 한 명 단위로 공유하며 일정·숙제·학원비를 함께 본다. 회원은 이메일(아이디)로, 비회원은 카카오톡 등 초대 링크로 초대하면 가입 시 자동 연결. 아이에게 공유하면 학생용 모드로 숙제를 스스로 체크.
+- 다이어리: 사진·동영상 기록과 AI 글쓰기 도움.
+- 할 일: 월간 캘린더와 알림.
+
+## 개인정보·광고
+
+- 광고 식별자(ADID/IDFA)를 수집하지 않으며, 행태정보를 이용한 맞춤형 광고를 제공하지 않는다.
+- 앱 내 광고 영역은 모든 이용자에게 동일하게 노출되는 제휴 배너이며, 광고임을 화면에 표시한다.
+- 계정 삭제는 앱과 웹(https://www.dadaring.com/delete-account.html)에서 직접 요청할 수 있다.
+
+## 문서
+
+- [자주 묻는 질문](https://www.dadaring.com/faq): 요금·지원 기기·가족 공유·학원비·개인정보 등 12문항
+- [주간 시간표 사용법](https://www.dadaring.com/blog/child-timetable): 요일 반복 등록과 휴강·시간 변경 처리
+- [학원비 관리](https://www.dadaring.com/blog/tuition-management): 결제일 자동 생성과 미납 관리, 사교육비 추이
+- [가족 공유](https://www.dadaring.com/blog/family-sharing): 배우자·조부모 초대와 권한
+- [알림장 AI](https://www.dadaring.com/blog/notice-ai): 가정통신문 사진에서 할 일 추출
+- [AR 영어독서](https://www.dadaring.com/blog/ar-english-reading): AR 지표 읽는 법과 성장 그래프
+- [홈 화면 위젯](https://www.dadaring.com/blog/widget-home-screen): 위젯 추가와 활용
+- [이용약관](https://www.dadaring.com/terms.html)
+- [개인정보처리방침](https://www.dadaring.com/privacy.html)

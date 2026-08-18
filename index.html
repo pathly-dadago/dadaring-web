@@ -10,6 +10,74 @@
   <meta property="og:description" content="아이의 하루를 스마트하게. 학원 일정, 알림장, AI 일기, 영어독서 리포트, 보호자 공유까지 다다링 하나로.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://dadaring.com">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "MobileApplication",
+        "@id": "https://www.dadaring.com/#app",
+        "name": "다다링",
+        "alternateName": ["DADAring", "다다링 앱"],
+        "applicationCategory": "LifestyleApplication",
+        "applicationSubCategory": "아이 학원·학교 일정 관리",
+        "operatingSystem": "Android 8.0+, iOS 15.0+",
+        "inLanguage": "ko-KR",
+        "url": "https://www.dadaring.com",
+        "downloadUrl": [
+          "https://apps.apple.com/kr/app/id6769691549",
+          "https://play.google.com/store/apps/details?id=com.dadaring.app"
+        ],
+        "description": "다다링은 아이의 학원·학교 일정을 관리하는 한국 학부모용 앱입니다. 요일별 반복되는 주간 시간표, 학원비 결제일과 미납 관리, 가정통신문 사진을 할 일로 자동 정리하는 알림장 AI, 영어 AR 성적 그래프, 홈 화면 위젯, 배우자·조부모와의 일정 공유를 한 앱에서 제공합니다.",
+        "offers": [
+          { "@type": "Offer", "name": "무료", "price": "0", "priceCurrency": "KRW",
+            "description": "1인 · AI 월 0.1M 토큰 · 저장공간 1GB. 핵심 기능은 무료로 사용할 수 있습니다." },
+          { "@type": "Offer", "name": "개인", "price": "2900", "priceCurrency": "KRW",
+            "description": "1인 · AI 월 1M 토큰 · 저장공간 10GB (월 구독)" },
+          { "@type": "Offer", "name": "패밀리", "price": "5900", "priceCurrency": "KRW",
+            "description": "최대 4명 · AI 월 4M 토큰 · 저장공간 50GB (월 구독)" },
+          { "@type": "Offer", "name": "프리미엄", "price": "11900", "priceCurrency": "KRW",
+            "description": "최대 6명 · AI 월 12M 토큰 · 저장공간 200GB (월 구독)" }
+        ],
+        "featureList": [
+          "주간 시간표 — 요일별 반복 일정, 이번 주만 휴강·시간 변경",
+          "학원비 관리 — 수강료·결제일 등록 시 매달 자동 생성, 미납·완료 표시, 월간·연간 추이",
+          "알림장 AI — 가정통신문 사진에서 날짜·준비물·신청 링크를 할 일로 자동 추출",
+          "AR 영어독서 — 영어학원 AR 평가서 사진으로 성장 그래프·또래 비교",
+          "홈 화면 위젯 — 앱을 열지 않고 오늘 일정과 주간 시간표 확인",
+          "가족 공유 — 배우자·조부모와 일정·숙제·학원비 공유, 카톡 링크 초대",
+          "다이어리 — 사진·동영상 기록과 AI 글쓰기 도움",
+          "할 일 관리 — 월간 캘린더와 알림"
+        ],
+        "publisher": { "@id": "https://www.dadaring.com/#org" }
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://www.dadaring.com/#org",
+        "name": "DADAGO",
+        "alternateName": "다다고",
+        "url": "https://www.dadaring.com",
+        "email": "contact@dadaring.com",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "가산디지털1로 75-15, 323호",
+          "addressLocality": "금천구",
+          "addressRegion": "서울",
+          "addressCountry": "KR"
+        },
+        "makesOffer": { "@id": "https://www.dadaring.com/#app" }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://www.dadaring.com/#website",
+        "url": "https://www.dadaring.com",
+        "name": "다다링",
+        "inLanguage": "ko-KR",
+        "publisher": { "@id": "https://www.dadaring.com/#org" }
+      }
+    ]
+  }
+  </script>
   <link rel="alternate" type="application/rss+xml" title="다다링 블로그" href="https://www.dadaring.com/rss.xml">
   <link rel="stylesheet" href="css/style.css">
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
@@ -24,6 +92,7 @@
     <div class="nav-links">
       <a href="/">소개</a>
       <a href="/blog">블로그</a>
+      <a href="/faq">FAQ</a>
       <a href="#" class="nav-feedback" id="feedback-open">피드백</a>
     </div>
   </div>
@@ -274,6 +343,7 @@
         <li><a href="#features">기능 소개</a></li>
         <li><a href="#about">다다링 소개</a></li>
         <li><a href="/blog">블로그</a></li>
+        <li><a href="/faq">자주 묻는 질문</a></li>
       </ul>
     </div>
     <div class="footer-links">
