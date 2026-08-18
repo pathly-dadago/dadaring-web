@@ -5,7 +5,7 @@ window.MARKETING_POSTS = [
   {
     slug: 'family-sharing',
     title: '6호 · 가족 공유',
-    date: '2026-08-08',
+    date: '2026-08-18',
     blogUrl: 'https://www.dadaring.com/blog/family-sharing',
     naver: {
       title: '아이 일정 가족 공유, 배우자·조부모와 같은 화면 보는 법 (맞벌이 육아 꿀팁)',
@@ -98,7 +98,7 @@ window.MARKETING_POSTS = [
 다다링, 무료로 시작 → 프로필 링크 (www.dadaring.com/app)
 
 #아이일정공유 #맞벌이육아 #조부모육아 #가족공유 #워킹맘꿀팁 #육아앱추천 #하원도우미 #초등맘 #육아꿀팁 #다다링`,
-      images: [1, 2, 3, 4, 5, 6].map(n => `/images/marketing/2026-08-08-family-sharing/card${n}.png`),
+      images: [1, 2, 3, 4, 5, 6].map(n => `/images/marketing/2026-08-18-family-sharing/card${n}.png`),
     },
     threads: [
       `"오늘 몇 시에 데리러 가?"
@@ -134,7 +134,7 @@ window.MARKETING_POSTS = [
   {
     slug: 'tuition-management',
     title: '5호 · 학원비 관리',
-    date: '2026-08-07',
+    date: '2026-08-10',
     blogUrl: 'https://www.dadaring.com/blog/tuition-management',
     naver: {
       title: '학원비 관리, 결제일 놓치지 않고 한 달에 얼마 쓰는지 한눈에 (초등 학부모 꿀팁)',
@@ -224,7 +224,7 @@ window.MARKETING_POSTS = [
 다다링, 무료로 시작 → 프로필 링크 (www.dadaring.com/app)
 
 #학원비 #사교육비 #학원비관리 #교육비 #초등맘 #워킹맘꿀팁 #육아앱추천 #가계부 #맞벌이육아 #육아꿀팁 #다다링`,
-      images: [1, 2, 3, 4, 5, 6].map(n => `/images/marketing/2026-08-07-tuition-management/card${n}.png`),
+      images: [1, 2, 3, 4, 5, 6].map(n => `/images/marketing/2026-08-10-tuition-management/card${n}.png`),
     },
     threads: [
       `"이번 달 학원비 다 나간 건가?"
