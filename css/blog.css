@@ -181,3 +181,16 @@
   line-height: 1.75;
   color: var(--text-secondary, #5E7468);
 }
+
+/* FAQ 답변 강조 — em=핵심 문구, mark=가장 어필할 한 구절 */
+.faq-a .faq-em {
+  color: var(--primary-dark, #35A866);
+  font-weight: 700;
+}
+.faq-a .faq-mark {
+  background: linear-gradient(transparent 58%, #CBEFDA 58%);
+  color: var(--text-primary, #2D3436);
+  font-weight: 700;
+  padding: 0 2px;
+  border-radius: 2px;
+}
