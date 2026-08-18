@@ -6,9 +6,16 @@
     <link>https://www.dadaring.com/blog</link>
     <description>바쁜 부모를 위한 아이 일정·학원 관리 이야기. 매주 하나씩, 다다링을 200% 활용하는 법을 전해드려요.</description>
     <language>ko</language>
-    <lastBuildDate>Fri, 07 Aug 2026 09:00:00 +0900</lastBuildDate>
+    <lastBuildDate>Sat, 08 Aug 2026 09:00:00 +0900</lastBuildDate>
     <atom:link href="https://www.dadaring.com/rss.xml" rel="self" type="application/rss+xml"/>
 
+    <item>
+      <title>아이 일정, 배우자·조부모와 같은 화면 보는 법 — 가족 공유</title>
+      <link>https://www.dadaring.com/blog/family-sharing</link>
+      <guid isPermaLink="true">https://www.dadaring.com/blog/family-sharing</guid>
+      <pubDate>Sat, 08 Aug 2026 09:00:00 +0900</pubDate>
+      <description>"오늘 몇 시에 데리러 가?" 하루에도 몇 번씩 오가는 카톡. 아이 일정을 배우자·조부모와 공유하면 묻고 답할 일이 사라집니다. 회원이 아니어도 카톡 링크로 초대할 수 있어요.</description>
+    </item>
     <item>
       <title>학원비, 결제일 놓치지 않고 한 달에 얼마 쓰는지 한눈에 — 학원비 관리</title>
       <link>https://www.dadaring.com/blog/tuition-management</link>

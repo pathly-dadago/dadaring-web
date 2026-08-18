@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<!-- 인스타 카드뉴스 렌더 소스 (1080x1350, 4:5). #card1~#card6 해시로 한 장씩 표시.
+     캡처: chrome headless --window-size=1080,1350 --screenshot=cardN.png cards.html#cardN -->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+  :root {
+    --primary: #43C67A; --primary-dark: #35A866; --surface: #EAF8F0;
+    --bg: #F5FFF9; --ink: #2D3436; --sub: #5E7468;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard', sans-serif; word-break: keep-all; }
+  .card { display: none; width: 1080px; height: 1350px; position: relative; overflow: hidden;
+          background: var(--bg); flex-direction: column; padding: 90px 84px; }
+  .card:target { display: flex; }
+  .brand { position: absolute; top: 64px; right: 84px; font-size: 34px; font-weight: 800;
+           color: var(--primary-dark); letter-spacing: -1px; }
+  .pageno { position: absolute; bottom: 56px; right: 84px; font-size: 26px; color: #B8C5D0; font-weight: 600; }
+  .kicker { font-size: 34px; font-weight: 700; color: var(--primary-dark); margin-bottom: 28px; }
+  h1 { font-size: 82px; font-weight: 800; line-height: 1.28; letter-spacing: -2px; color: var(--ink); }
+  h1 .hl { color: var(--primary-dark); }
+  .sub { font-size: 40px; line-height: 1.6; color: var(--sub); margin-top: 40px; font-weight: 500; }
+  .center { justify-content: center; }
+  .paper { background: #fff; border: 3px solid var(--surface); border-radius: 32px;
+           padding: 44px 50px; box-shadow: 0 16px 40px rgba(31,51,41,.08);
+           font-size: 38px; font-weight: 600; color: var(--ink); line-height: 1.85;
+           width: fit-content; }
+  .paper small { display: block; font-size: 30px; color: #B8C5D0; font-weight: 700; letter-spacing: 0; margin-bottom: 16px; }
+  .paper .x { color: #C9A227; }
+  .shot-wrap { flex: 1; display: flex; align-items: center; justify-content: center; margin-top: 48px; }
+  .shot-wrap img { border-radius: 36px; border: 2px solid #D8F0E3;
+                   box-shadow: 0 24px 64px rgba(31,51,41,.14); }
+  .rows { margin-top: 64px; display: flex; flex-direction: column; gap: 36px; }
+  .row { background: #fff; border: 2px solid #D8F0E3; border-radius: 32px; padding: 44px 48px;
+         display: flex; gap: 36px; align-items: flex-start;
+         box-shadow: 0 12px 32px rgba(31,51,41,.06); }
+  .row .emoji { font-size: 64px; line-height: 1.1; }
+  .row h3 { font-size: 44px; font-weight: 800; color: var(--ink); margin-bottom: 10px; }
+  .row p { font-size: 34px; line-height: 1.55; color: var(--sub); }
+  /* 4번 카드 — 이번 주만 vs 매주 반복 대비 */
+  .pick { margin-top: 64px; display: flex; flex-direction: column; gap: 32px; }
+  .pick .opt { background: #fff; border: 3px solid #D8F0E3; border-radius: 32px; padding: 44px 48px;
+               box-shadow: 0 12px 32px rgba(31,51,41,.06); }
+  .pick .opt.on { border-color: var(--primary); background: #F2FCF6; }
+  .pick .opt .tag { display: inline-block; font-size: 30px; font-weight: 800; color: var(--primary-dark);
+                    background: var(--surface); border-radius: 999px; padding: 10px 26px; margin-bottom: 18px; }
+  .pick .opt h3 { font-size: 46px; font-weight: 800; color: var(--ink); margin-bottom: 12px; }
+  .pick .opt p { font-size: 34px; line-height: 1.55; color: var(--sub); }
+  .cta-box { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+             border-radius: 48px; padding: 96px 72px; text-align: center; margin-top: 72px; }
+  .cta-box h2 { font-size: 72px; font-weight: 800; color: #fff; letter-spacing: -1px; }
+  .cta-box p { font-size: 40px; color: rgba(255,255,255,.9); margin-top: 24px; }
+  .stores { display: flex; gap: 28px; justify-content: center; margin-top: 56px; }
+  .stores span { background: #2D3436; color: #fff; font-size: 36px; font-weight: 700;
+                 padding: 28px 48px; border-radius: 24px; }
+  /* 5호 — 상태 배지 목록 */
+  .stat { margin-top: 60px; display: flex; flex-direction: column; gap: 30px; }
+  .stat .s { background: #fff; border: 2px solid #D8F0E3; border-radius: 30px; padding: 40px 46px;
+             display: flex; align-items: center; gap: 32px; box-shadow: 0 12px 32px rgba(31,51,41,.06); }
+  .stat .dot { width: 26px; height: 26px; border-radius: 50%; flex: none; }
+  .stat b { display: block; font-size: 46px; font-weight: 800; color: var(--ink); }
+  .stat span { display: block; font-size: 34px; color: var(--sub); margin-top: 8px; }
+  .money { background: #fff; border: 3px solid var(--surface); border-radius: 36px; padding: 56px 60px;
+           box-shadow: 0 16px 40px rgba(31,51,41,.08); margin-top: 60px; }
+  .money .lbl { font-size: 32px; color: #B8C5D0; font-weight: 700; }
+  .money .amt { font-size: 92px; font-weight: 800; color: var(--ink); letter-spacing: -3px; margin-top: 10px; }
+  .money .split { display: flex; gap: 20px; margin-top: 34px; }
+  .money .split div { flex: 1; border-radius: 24px; padding: 28px 30px; }
+  .money .split .paid { background: #EAF8F0; }
+  .money .split .due { background: #FDF3E2; }
+  .money .split small { display: block; font-size: 28px; font-weight: 700; color: var(--sub); }
+  .money .split strong { display: block; font-size: 40px; font-weight: 800; color: var(--ink); margin-top: 8px; }
+  /* 6호 — 카톡 말풍선 */
+  .chat { margin-top: 56px; display: flex; flex-direction: column; gap: 26px; }
+  .chat .b { max-width: 76%; font-size: 38px; font-weight: 600; line-height: 1.5;
+             padding: 32px 38px; border-radius: 34px; box-shadow: 0 10px 26px rgba(31,51,41,.07); }
+  .chat .them { align-self: flex-start; background: #fff; border: 2px solid #E4EAE6; border-bottom-left-radius: 10px; }
+  .chat .me { align-self: flex-end; background: #FBE9A0; border-bottom-right-radius: 10px; }
+</style>
+</head>
+<body>
+
+<!-- 1: 훅 -->
+<section class="card center" id="card1">
+  <div class="brand">DADAring</div>
+  <div class="chat">
+    <div class="b them">오늘 몇 시에 데리러 가?</div>
+    <div class="b me">태권도야? 피아노야?</div>
+    <div class="b them">준비물 뭐 챙겨 보냈어?</div>
+  </div>
+  <h1 style="margin-top:64px;">하루에도<br><span class="hl">몇 번씩</span></h1>
+  <p class="sub">할머니껜 매번 같은 설명을 다시.</p>
+  <div class="pageno">1 / 6</div>
+</section>
+
+<!-- 2: 해법 -->
+<section class="card" id="card2">
+  <div class="brand">DADAring</div>
+  <div class="kicker">다다링 가족 공유</div>
+  <h1>같은 화면을<br><span class="hl">보면 됩니다</span></h1>
+  <div class="shot-wrap"><img src="_share-clean.png" alt="" style="width:520px;"></div>
+  <div class="pageno">2 / 6</div>
+</section>
+
+<!-- 3: 무엇이 공유되나 -->
+<section class="card" id="card3">
+  <div class="brand">DADAring</div>
+  <div class="kicker">아이 한 명 단위로</div>
+  <h1>일정만<br><span class="hl">공유되는 게 아니에요</span></h1>
+  <div class="rows">
+    <div class="row"><div class="emoji">📅</div><div><h3>일정</h3><p>함께 보고, 함께 고칠 수 있어요</p></div></div>
+    <div class="row"><div class="emoji">✅</div><div><h3>숙제</h3><p>아이가 체크하면 부모 화면에도 반영</p></div></div>
+    <div class="row"><div class="emoji">💰</div><div><h3>학원비</h3><p>납부 여부를 함께 관리</p></div></div>
+  </div>
+  <div class="pageno">3 / 6</div>
+</section>
+
+<!-- 4: 초대 방법 (핵심) -->
+<section class="card center" id="card4">
+  <div class="brand">DADAring</div>
+  <div class="kicker">회원이 아니어도</div>
+  <h1>카톡 링크<br><span class="hl">하나면 끝</span></h1>
+  <div class="pick">
+    <div class="opt">
+      <span class="tag">이미 회원</span>
+      <h3>아이디로 초대</h3>
+      <p>이메일만 입력. 상대가 앱 알림에서 수락하면 연결.</p>
+    </div>
+    <div class="opt on">
+      <span class="tag">비회원도 OK</span>
+      <h3>링크로 초대</h3>
+      <p>카톡으로 링크 전송. 가입하는 순간 아이가 자동 연결.</p>
+    </div>
+  </div>
+  <p class="sub" style="font-size:32px;margin-top:40px;">"앱 깔고 이메일 알려줘" 설명이 필요 없어요.</p>
+  <div class="pageno">4 / 6</div>
+</section>
+
+<!-- 5: 관리·아이 공유 -->
+<section class="card" id="card5">
+  <div class="brand">DADAring</div>
+  <div class="kicker">보내고 나서도</div>
+  <h1>누가 보는지<br><span class="hl">한눈에</span></h1>
+  <div class="rows">
+    <div class="row"><div class="emoji">🟢</div><div><h3>연결됨 / 대기중</h3><p>수락 전인 사람도 상태로 구분돼요</p></div></div>
+    <div class="row"><div class="emoji">✂️</div><div><h3>해제·취소</h3><p>언제든 연결을 끊거나 초대를 취소</p></div></div>
+    <div class="row"><div class="emoji">🎒</div><div><h3>아이에게도 공유</h3><p>학생용 모드로 숙제를 스스로 체크</p></div></div>
+  </div>
+  <div class="pageno">5 / 6</div>
+</section>
+
+<!-- 6: CTA -->
+<section class="card center" id="card6">
+  <div class="brand">DADAring</div>
+  <h1>같은 화면을 보면,<br><span class="hl">묻고 답할 일이 줄어요</span></h1>
+  <p class="sub">가족 공유 · 학원 일정 · 학원비 · 위젯 · 알림장</p>
+  <div class="cta-box">
+    <h2>다다링, 무료로 시작</h2>
+    <p>스토어에서 "다다링"을 검색하세요</p>
+    <div class="stores"><span>🍎 App Store</span><span>🤖 Google Play</span></div>
+  </div>
+  <div class="pageno">6 / 6</div>
+</section>
+
+</body>
+</html>
