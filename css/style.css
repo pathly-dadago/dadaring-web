@@ -199,74 +199,6 @@ a:hover { text-decoration: underline; }
   letter-spacing: 0.3px;
 }
 
-/* ── Screenshots showcase ── */
-.shots {
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 72px 0 80px;
-}
-.shots h2 {
-  text-align: center;
-  font-size: 28px;
-  font-weight: 800;
-  margin-bottom: 12px;
-  padding: 0 24px;
-}
-.shots .section-sub {
-  text-align: center;
-  color: var(--text-secondary);
-  margin-bottom: 40px;
-  font-size: 15px;
-  padding: 0 24px;
-}
-.shots-scroll {
-  display: flex;
-  gap: 24px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  padding: 8px 24px 28px;
-  scrollbar-width: none;
-}
-.shots-scroll::-webkit-scrollbar { display: none; }
-.shot {
-  flex: 0 0 auto;
-  width: 232px;
-  scroll-snap-align: center;
-  text-align: center;
-}
-.shot img {
-  width: 100%;
-  height: auto;
-  display: block;
-  border-radius: 22px;
-  border: 1px solid var(--divider);
-  box-shadow: 0 10px 30px rgba(31, 51, 41, 0.10);
-}
-.shot-hl img {
-  border-color: var(--primary);
-  box-shadow: 0 14px 36px rgba(67, 198, 122, 0.28);
-}
-.shot figcaption {
-  margin-top: 14px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-.cap-new {
-  margin-left: 4px;
-  padding: 1px 7px;
-  background: var(--primary);
-  color: #fff;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 800;
-  vertical-align: middle;
-}
-@media (max-width: 640px) {
-  .shot { width: 200px; }
-}
-
 /* ── Use Cases ── */
 .usecases {
   background: var(--card);
@@ -644,4 +576,125 @@ a:hover { text-decoration: underline; }
   .home-post { flex-direction: row; align-items: stretch; }
   .home-post img { width: 108px; height: auto; flex: none; }
   .home-post > div { padding: 14px 16px; }
+}
+
+/* ── Hero: 좌 문구 / 우 실제 화면 ── */
+.hero-grid {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.02fr 0.98fr;
+  gap: 56px;
+  align-items: center;
+  text-align: left;
+}
+.hero-copy .store-buttons { justify-content: flex-start; }
+.hero-note {
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.hero-device {
+  display: flex;
+  justify-content: center;
+}
+.hero-device img {
+  width: 100%;
+  max-width: 340px;
+  height: auto;
+  display: block;
+}
+
+/* ── Features: 실제 화면 + 설명 교차 ── */
+.featrows {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 80px 24px 40px;
+}
+.featrows h2 {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+.featrows .section-sub {
+  text-align: center;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  font-size: 15px;
+}
+.featrow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 56px;
+  align-items: center;
+  padding: 44px 0;
+  border-top: 1px solid var(--divider);
+}
+.featrow:first-of-type { border-top: 0; }
+.featrow-media { display: flex; justify-content: center; }
+.featrow-media img {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  display: block;
+}
+/* 짝수 행은 화면을 오른쪽으로 — 시선이 지그재그로 내려간다 */
+.featrow.rev .featrow-media { order: 2; }
+.featrow-eyebrow {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--primary-surface);
+  color: var(--primary-dark);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+.featrow-body h3 {
+  margin: 14px 0 10px;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.32;
+  letter-spacing: -0.02em;
+}
+.featrow-body > p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.75;
+}
+.featrow-body > p strong { color: var(--text-primary); }
+.featrow-list {
+  list-style: none;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.featrow-list li {
+  position: relative;
+  padding-left: 26px;
+  font-size: 14.5px;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+.featrow-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--primary);
+  font-weight: 800;
+}
+.featrow-list li strong { color: var(--primary-dark); }
+
+@media (max-width: 860px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 32px; text-align: center; }
+  .hero-copy .store-buttons { justify-content: center; }
+  .hero-device img { max-width: 260px; }
+  .featrow { grid-template-columns: 1fr; gap: 28px; padding: 36px 0; }
+  /* 모바일에선 항상 화면이 먼저 */
+  .featrow.rev .featrow-media { order: 0; }
+  .featrow-media img { max-width: 260px; }
+  .featrow-body h3 { font-size: 21px; }
 }
