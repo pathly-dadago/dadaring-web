@@ -223,8 +223,15 @@ a:hover { text-decoration: underline; }
 }
 .usecase-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  /* 4장을 한 줄로. 좁아지면 2줄 → 1줄 순으로만 접힌다(3+1 방지). */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 20px;
+}
+@media (max-width: 1000px) {
+  .usecase-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .usecase-grid { grid-template-columns: 1fr; }
 }
 .usecase-card {
   background: var(--bg);
@@ -255,7 +262,7 @@ a:hover { text-decoration: underline; }
   padding: 60px 24px;
 }
 .stats-inner {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
   display: flex;
   justify-content: space-around;
@@ -605,96 +612,63 @@ a:hover { text-decoration: underline; }
   display: block;
 }
 
-/* ── Features: 실제 화면 + 설명 교차 ── */
-.featrows {
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 80px 24px 40px;
+
 }
-.featrows h2 {
+
+/* ── 스크린샷 한 줄 ── */
+.shots {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 72px 0 24px;
+}
+.shots h2 {
   text-align: center;
   font-size: 28px;
   font-weight: 800;
   margin-bottom: 12px;
+  padding: 0 24px;
 }
-.featrows .section-sub {
+.shots .section-sub {
   text-align: center;
   color: var(--text-secondary);
-  margin-bottom: 24px;
+  margin-bottom: 36px;
   font-size: 15px;
+  padding: 0 24px;
 }
-.featrow {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 56px;
-  align-items: center;
-  padding: 44px 0;
-  border-top: 1px solid var(--divider);
-}
-.featrow:first-of-type { border-top: 0; }
-.featrow-media { display: flex; justify-content: center; }
-.featrow-media img {
-  width: 100%;
-  max-width: 300px;
-  height: auto;
-  display: block;
-}
-/* 짝수 행은 화면을 오른쪽으로 — 시선이 지그재그로 내려간다 */
-.featrow.rev .featrow-media { order: 2; }
-.featrow-eyebrow {
-  display: inline-block;
-  padding: 4px 12px;
-  background: var(--primary-surface);
-  color: var(--primary-dark);
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.2px;
-}
-.featrow-body h3 {
-  margin: 14px 0 10px;
-  font-size: 24px;
-  font-weight: 800;
-  line-height: 1.32;
-  letter-spacing: -0.02em;
-}
-.featrow-body > p {
-  font-size: 15px;
-  color: var(--text-secondary);
-  line-height: 1.75;
-}
-.featrow-body > p strong { color: var(--text-primary); }
-.featrow-list {
-  list-style: none;
-  margin-top: 20px;
+.shots-scroll {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 24px 24px;
+  scrollbar-width: none;
 }
-.featrow-list li {
-  position: relative;
-  padding-left: 26px;
-  font-size: 14.5px;
+.shots-scroll::-webkit-scrollbar { display: none; }
+.shot {
+  flex: 0 0 auto;
+  width: 176px;
+  scroll-snap-align: center;
+  text-align: center;
+}
+/* 폰 목업 PNG 자체에 모서리·그림자가 들어 있어 테두리를 덧대지 않는다 */
+.shot img { width: 100%; height: auto; display: block; }
+.shot figcaption {
+  margin-top: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
   color: var(--text-primary);
-  line-height: 1.6;
 }
-.featrow-list li::before {
-  content: "✓";
-  position: absolute;
-  left: 0;
-  top: 0;
-  color: var(--primary);
+.cap-new {
+  margin-left: 4px;
+  padding: 1px 7px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 10px;
   font-weight: 800;
+  vertical-align: middle;
 }
-.featrow-list li strong { color: var(--primary-dark); }
-
-@media (max-width: 860px) {
-  .hero-grid { grid-template-columns: 1fr; gap: 32px; text-align: center; }
-  .hero-copy .store-buttons { justify-content: center; }
-  .hero-device img { max-width: 260px; }
-  .featrow { grid-template-columns: 1fr; gap: 28px; padding: 36px 0; }
-  /* 모바일에선 항상 화면이 먼저 */
-  .featrow.rev .featrow-media { order: 0; }
-  .featrow-media img { max-width: 260px; }
-  .featrow-body h3 { font-size: 21px; }
+@media (max-width: 640px) {
+  .shot { width: 152px; }
 }
