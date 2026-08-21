@@ -617,7 +617,7 @@ a:hover { text-decoration: underline; }
 
 /* ── 스크린샷 한 줄 ── */
 .shots {
-  max-width: 1180px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 72px 0 24px;
 }
@@ -645,9 +645,13 @@ a:hover { text-decoration: underline; }
   scrollbar-width: none;
 }
 .shots-scroll::-webkit-scrollbar { display: none; }
+/* 여백이 남으면 가운데, 넘치면 왼쪽부터.
+   justify-content:center 는 넘칠 때 첫 장이 잘려 보여서 auto 마진으로 처리한다. */
+.shots-scroll > :first-child { margin-left: auto; }
+.shots-scroll > :last-child { margin-right: auto; }
 .shot {
   flex: 0 0 auto;
-  width: 176px;
+  width: 150px;
   scroll-snap-align: center;
   text-align: center;
 }
@@ -670,5 +674,39 @@ a:hover { text-decoration: underline; }
   vertical-align: middle;
 }
 @media (max-width: 640px) {
-  .shot { width: 152px; }
+  .shot { width: 146px; }
+}
+
+/* ── 기능: 12장 카드 → 주제별 3묶음 ── */
+.fgroups {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.fgroup {
+  background: var(--card);
+  border: 1px solid var(--divider);
+  border-radius: 16px;
+  padding: 26px 24px;
+}
+.fgroup-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--primary-dark);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--divider);
+}
+.fgroup ul { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+.fgroup li { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+.fgroup li b {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+.fgroup li .badge-new { margin-left: 5px; vertical-align: 1px; }
+@media (max-width: 900px) {
+  .fgroups { grid-template-columns: 1fr; gap: 16px; }
 }
