@@ -592,9 +592,11 @@ a:hover { text-decoration: underline; }
   color: var(--text-secondary);
 }
 
-/* ── 스크린샷 한 줄 ── */
+/* ── Screenshots showcase ── */
 .shots {
-  padding: 84px 0 32px;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 72px 0 80px;
 }
 .shots h2 {
   text-align: center;
@@ -606,32 +608,40 @@ a:hover { text-decoration: underline; }
 .shots .section-sub {
   text-align: center;
   color: var(--text-secondary);
-  margin-bottom: 36px;
+  margin-bottom: 40px;
   font-size: 15px;
   padding: 0 24px;
 }
 .shots-scroll {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
-  /* 화면 끝까지 흘러 '옆으로 더 있다'가 보이게 — 가운데 정렬하지 않는다 */
-  padding: 8px max(24px, calc((100vw - 1180px) / 2)) 28px;
+  padding: 8px 24px 28px;
   scrollbar-width: none;
 }
 .shots-scroll::-webkit-scrollbar { display: none; }
-
 .shot {
   flex: 0 0 auto;
-  width: 228px;
+  width: 232px;
   scroll-snap-align: center;
   text-align: center;
 }
-/* 폰 목업 PNG 자체에 모서리·그림자가 들어 있어 테두리를 덧대지 않는다 */
-.shot img { width: 100%; height: auto; display: block; }
+.shot img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 22px;
+  border: 1px solid var(--divider);
+  box-shadow: 0 10px 30px rgba(31, 51, 41, 0.10);
+}
+.shot-hl img {
+  border-color: var(--primary);
+  box-shadow: 0 14px 36px rgba(67, 198, 122, 0.28);
+}
 .shot figcaption {
-  margin-top: 12px;
+  margin-top: 14px;
   font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
@@ -647,7 +657,7 @@ a:hover { text-decoration: underline; }
   vertical-align: middle;
 }
 @media (max-width: 640px) {
-  .shot { width: 188px; }
+  .shot { width: 200px; }
 }
 
 /* ── 기능: 12장 카드 → 주제별 3묶음 ── */
