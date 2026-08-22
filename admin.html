@@ -998,13 +998,17 @@ function childAgesChart(ages) {
   return sv + '</svg>' + `<div style="margin-top:6px;text-align:center">${legend}</div>`;
 }
 
+// homework_todo·class 는 서버가 묶어주는 통합 항목(2026-08-22) — 나머지
+// 개별 키는 구버전 API 응답 호환용으로 유지.
 const FEATURE_NAMES = { notice: '📋 알림장', diary: '📔 일기', ar: '📚 AR 독서',
-                        todo: '✅ 할일', tuition: '💰 학원비',
+                        homework_todo: '📝 숙제/할일',
+                        todo: '✅ 할일', homework: '📝 숙제',
+                        tuition: '💰 학원비',
+                        class: '🏫 클래스',
                         class_reco: '✨ 클래스 추천(AI)',
                         class_enrich: '🤖 클래스 정보 보강 (시스템 배치)',
-                        class: '🏫 클래스 탐색(찜)',
                         child_icon: '🎨 아이 아이콘',
-                        schedule: '🗓️ 시간표', homework: '📝 숙제',
+                        schedule: '🗓️ 시간표',
                         institution: '🏫 학교(원) 관리', sharing: '👨‍👩‍👧 공유' };
 const TIER_NAMES = { free: '무료', individual: '개인', family: '패밀리', premium: '프리미엄',
                      system: '🤖 시스템(크론)' };
