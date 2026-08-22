@@ -220,8 +220,10 @@
     .feat .fl{font-size:12.5px;margin-bottom:4px;}
     .feat .ftrack{background:var(--surface);border-radius:6px;height:10px;overflow:hidden;position:relative;}
     .feat .ffill{background:var(--green);height:100%;border-radius:6px;}
-    /* AI 사용자 겹침 바 — 전체(초록)와 확실히 구분되는 보라로 얹는다 */
-    .feat .ffill.fai{position:absolute;inset:0 auto 0 0;background:#8B5CF6;}
+    /* 기능별 사용자: 전체=연녹, AI=진녹 겹침 (2026-08-22 사용자 결정 —
+       트랙 #EAF8F0 위에서도 서로도 뚜렷하게 갈리는 명도 차이로 선택) */
+    .feat .ffill.fall{background:#A9E3C3;}
+    .feat .ffill.fai{position:absolute;inset:0 auto 0 0;background:#1E7A46;}
     /* 데스크톱: 가입/활성 추이를 1행 2열로 */
     .chart-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:860px;}
     .scard-sub{font-size:12px;color:var(--ts);margin:2px 0 10px;}
@@ -1115,7 +1117,7 @@ function renderStats() {
     <div class="feat">
       <div class="fl">${FEATURE_NAMES[f.key] || esc(f.key)} · ${fmtInt(f.users)}명`
       + ` (AI ${fmtInt(f.aiUsers)}명)${f.tokens ? ' · ' + fmtTok(f.tokens) : ''}</div>
-      <div class="ftrack"><div class="ffill" style="width:${Math.max(2, Math.round(f.users / maxF * 100))}%"></div>`
+      <div class="ftrack"><div class="ffill fall" style="width:${Math.max(2, Math.round(f.users / maxF * 100))}%"></div>`
       + `<div class="ffill fai" style="width:${Math.max(f.aiUsers ? 2 : 0, Math.round(f.aiUsers / maxF * 100))}%"></div></div>
     </div>`).join('');
 
@@ -1174,7 +1176,7 @@ function renderStats() {
     </div>
     <div class="chart-2col">
       <div class="scard"><h2>기능별 사용자${featWindowNote()}</h2>
-        <div class="legend"><span><i style="background:var(--green)"></i>전체 사용</span><span><i style="background:#8B5CF6"></i>AI 사용</span></div>
+        <div class="legend"><span><i style="background:#A9E3C3"></i>전체 사용</span><span><i style="background:#1E7A46"></i>AI 사용</span></div>
         ${featHtml}</div>
       <div class="scard"><h2>저장공간 (사진) — 총 ${fmtBytes(stor.total)}</h2>${storHtml}</div>
     </div>`;
