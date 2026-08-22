@@ -402,6 +402,9 @@ const DEV = new URLSearchParams(location.search).get('env') === 'dev';
 const API = DEV ? 'https://c5gye4ook6.execute-api.ap-northeast-2.amazonaws.com/dev'
                : 'https://dnbl3bo4eg.execute-api.ap-northeast-2.amazonaws.com/prod';
 const CLIENT_ID = DEV ? '29ge20drb8s709amr04u54pbv8' : '289jkoj217r2u661mfe5jf9avs';
+// 기록함은 별도 스택(RecordsStack — CoreStack 500 리소스 리밋으로 분리) API.
+const RECORDS_API = DEV ? 'https://kfkt88n1a4.execute-api.ap-northeast-2.amazonaws.com/dev'
+                       : 'https://4jadgtrmee.execute-api.ap-northeast-2.amazonaws.com/prod';
 const COGNITO = 'https://cognito-idp.ap-northeast-2.amazonaws.com/';
 
 let feedbacks = [], filter = 'all', selectedId = null;
@@ -473,7 +476,9 @@ function showLogin(msg) {
 }
 
 async function api(path, opts = {}, _retried = false) {
-  const res = await fetch(API + path, { ...opts,
+  // 절대 URL 이면 그대로(기록함 등 별도 스택), 아니면 CoreStack API 에 붙인다.
+  const url = /^https:/.test(path) ? path : API + path;
+  const res = await fetch(url, { ...opts,
     headers: { 'Content-Type': 'application/json',
                // 앱과 동일하게 raw 토큰 — API GW Cognito authorizer 는 Bearer 접두어를 못 읽는다
                'Authorization': token(), ...(opts.headers || {}) } });
@@ -723,7 +728,41 @@ async function loadStats() {
   }
   // 광고 집계는 별도 API — 실패해도 나머지 통계는 그대로 보여준다.
   await loadCpStats(statsPeriod === 'all' ? 180 : Number(statsPeriod) || 90);
+  // 기록함 분류 현황(별도 스택) — 실패해도 나머지 통계는 그대로.
+  try { recStats = await api(RECORDS_API + '/records/admin/stats'); }
+  catch (e) { recStats = null; }
   renderStats();
+}
+
+// {total, byCategory, unclassifiedRatio, recentUnclassified:[{title,summary,traits,createdAt}]}
+let recStats = null;
+const REC_CAT_LABELS = { notice: '📋 알림장', ar_report: '📚 AR 평가서',
+  tuition_receipt: '💰 학원비 영수증', artwork: '🎨 작품', unclassified: '🗂 미분류' };
+
+/// 기록함 카드 — 카테고리 분포 바 + 최근 미분류 요약(신규 다다앱 후보 발굴용).
+function recStatsCard() {
+  if (!recStats || !recStats.total) {
+    return `<div class="scard"><h2>기록함 — 분류 현황</h2>
+      <div class="empty">${recStats ? '아직 기록이 없어요' : '기록함 통계를 불러오지 못했어요'}</div></div>`;
+  }
+  const by = recStats.byCategory || {};
+  const max = Math.max(1, ...Object.values(by).map(Number));
+  const bars = Object.keys(REC_CAT_LABELS).filter(c => by[c]).map(c =>
+    `<div class="frow"><span class="fname">${REC_CAT_LABELS[c]}</span>
+      <span class="fnum">${fmtInt(by[c])}</span>
+      <div class="ftrack"><div class="ffill" style="width:${Math.max(2, Math.round(by[c] / max * 100))}%"></div></div></div>`).join('');
+  const recent = (recStats.recentUnclassified || []).slice(0, 8).map(r =>
+    `<div style="padding:5px 0;border-top:1px solid #EEF3EF;font-size:12px;">
+      <b>${esc(r.title || '(제목 없음)')}</b>
+      <span style="color:#8AA294;">· ${fmt(r.createdAt)}</span><br>
+      <span style="color:#5C6E63;">${esc(r.summary || '')}</span>
+      ${(r.traits || []).length ? `<span style="color:#8AA294;"> — ${esc((r.traits || []).join(', '))}</span>` : ''}
+    </div>`).join('');
+  return `<div class="scard">
+    <h2>기록함 — 분류 현황 (전체 ${fmtInt(recStats.total)}건 · 미분류 ${(recStats.unclassifiedRatio * 100).toFixed(0)}%)</h2>
+    ${bars}
+    ${recent ? `<div class="scard-sub" style="margin-top:10px;">최근 미분류 — 새 다다앱 후보 신호</div>${recent}` : ''}
+  </div>`;
 }
 
 function setStatsPeriod(p) { statsPeriod = p; syncStatsChips(); loadStats(); }
@@ -1182,6 +1221,9 @@ function renderStats() {
         </div>
         ${featHtml}</div>
       <div class="scard"><h2>저장공간 (사진) — 총 ${fmtBytes(stor.total)}</h2>${storHtml}</div>
+    </div>
+    <div class="chart-2col">
+      ${recStatsCard()}
     </div>`;
 }
 
