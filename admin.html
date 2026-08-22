@@ -853,8 +853,8 @@ const TIER_SEGS = [
   { key: 'individual', label: '개인',     color: '#7FD6A4' },
   { key: 'family',     label: '패밀리',   color: '#43C67A' },
   { key: 'premium',    label: '프리미엄', color: '#2A8F55' },
-  // owner 없는 크론/배치(class_enrich 등) — 유저 티어와 색으로 구분
-  { key: 'system',     label: '시스템',   color: '#AEB8B2' },
+  // system(크론/배치)은 일별 그래프에서 숨긴다(2026-08-22 사용자 결정) —
+  // 유저 사용량 추이만 보이게. 총량·시스템분은 아래 티어 표에서 확인.
 ];
 const segVal = (r, k) => Number(r.byTier?.[k]) || 0;
 
