@@ -218,8 +218,10 @@
     .tier td.over{color:var(--red);font-weight:700;}
     .feat{margin-bottom:10px;}
     .feat .fl{font-size:12.5px;margin-bottom:4px;}
-    .feat .ftrack{background:var(--surface);border-radius:6px;height:10px;overflow:hidden;}
+    .feat .ftrack{background:var(--surface);border-radius:6px;height:10px;overflow:hidden;position:relative;}
     .feat .ffill{background:var(--green);height:100%;border-radius:6px;}
+    /* AI 사용자 겹침 바 — 전체 사용자 바 위에 진한 색으로 얹는다 */
+    .feat .ffill.fai{position:absolute;inset:0 auto 0 0;background:var(--greenD);opacity:.85;}
     /* 데스크톱: 가입/활성 추이를 1행 2열로 */
     .chart-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:860px;}
     .scard-sub{font-size:12px;color:var(--ts);margin:2px 0 10px;}
@@ -995,9 +997,11 @@ function childAgesChart(ages) {
 }
 
 const FEATURE_NAMES = { notice: '📋 알림장', diary: '📔 일기', ar: '📚 AR 독서',
-                        todo: '✅ 할일 AI', tuition: '💰 학원비',
-                        class_reco: '🏫 클래스 추천',
-                        child_icon: '🎨 아이 아이콘' };
+                        todo: '✅ 할일', tuition: '💰 학원비',
+                        class_reco: '🏫 클래스 추천', class_enrich: '🏫 클래스 정보',
+                        child_icon: '🎨 아이 아이콘',
+                        schedule: '🗓️ 시간표', homework: '📝 숙제',
+                        institution: '🏫 학교(원) 관리', sharing: '👨‍👩‍👧 공유' };
 const TIER_NAMES = { free: '무료', individual: '개인', family: '패밀리', premium: '프리미엄' };
 const UNIT_LABEL = { day: '일별', week: '주별', month: '월별' };
 
@@ -1086,15 +1090,20 @@ function renderStats() {
       + `<td${pct != null && pct > 100 ? ' class="over"' : ''}>${pct == null ? '–' : Math.round(pct) + '%'}</td></tr>`;
   }).join('');
 
-  // 기능별 바 — 토큰 내림차순, 최대값 대비 % 폭 (서버 조회 구간 기준: 일별 분해 없음)
+  // 기능별 바 — 사용자수(전체, AI 무관) 내림차순·기준 폭. AI 사용자는 겹친
+  // 진한 바 + 라벨로 병기 (aiUsers 없는 구버전 응답은 users 로 폴백).
   const feats = Object.entries(data.tokens?.byFeature || {})
-    .map(([k, v]) => ({ key: k, users: Number(v?.users) || 0, tokens: Number(v?.tokens) || 0 }))
-    .sort((x, y) => y.tokens - x.tokens);
-  const maxF = Math.max(1, ...feats.map(f => f.tokens));
+    .map(([k, v]) => ({ key: k, users: Number(v?.users) || 0,
+                        aiUsers: Number(v?.aiUsers ?? v?.users) || 0,
+                        tokens: Number(v?.tokens) || 0 }))
+    .sort((x, y) => y.users - x.users || y.tokens - x.tokens);
+  const maxF = Math.max(1, ...feats.map(f => f.users));
   const featHtml = !feats.length ? EMPTY_CHART : feats.map(f => `
     <div class="feat">
-      <div class="fl">${FEATURE_NAMES[f.key] || esc(f.key)} · ${fmtInt(f.users)}명 · ${fmtTok(f.tokens)}</div>
-      <div class="ftrack"><div class="ffill" style="width:${Math.max(2, Math.round(f.tokens / maxF * 100))}%"></div></div>
+      <div class="fl">${FEATURE_NAMES[f.key] || esc(f.key)} · ${fmtInt(f.users)}명`
+      + ` (AI ${fmtInt(f.aiUsers)}명)${f.tokens ? ' · ' + fmtTok(f.tokens) : ''}</div>
+      <div class="ftrack"><div class="ffill" style="width:${Math.max(2, Math.round(f.users / maxF * 100))}%"></div>`
+      + `<div class="ffill fai" style="width:${Math.max(f.aiUsers ? 2 : 0, Math.round(f.aiUsers / maxF * 100))}%"></div></div>
     </div>`).join('');
 
   // 저장공간(사진) — 티어별 바이트. 서버 storage 섹션(없으면 0 방어).
@@ -1151,7 +1160,9 @@ function renderStats() {
         ${adRows.length ? legend([['#7FD6A4', '노출 (좌축)'], ['#35A866', '클릭 (우축)']]) : ''}</div>
     </div>
     <div class="chart-2col">
-      <div class="scard"><h2>기능별 AI 사용${featWindowNote()}</h2>${featHtml}</div>
+      <div class="scard"><h2>기능별 사용자${featWindowNote()}</h2>
+        <div class="legend"><span><i style="background:var(--green)"></i>전체 사용</span><span><i style="background:var(--greenD)"></i>AI 사용</span></div>
+        ${featHtml}</div>
       <div class="scard"><h2>저장공간 (사진) — 총 ${fmtBytes(stor.total)}</h2>${storHtml}</div>
     </div>`;
 }
