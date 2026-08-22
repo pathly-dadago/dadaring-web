@@ -220,8 +220,8 @@
     .feat .fl{font-size:12.5px;margin-bottom:4px;}
     .feat .ftrack{background:var(--surface);border-radius:6px;height:10px;overflow:hidden;position:relative;}
     .feat .ffill{background:var(--green);height:100%;border-radius:6px;}
-    /* AI 사용자 겹침 바 — 전체 사용자 바 위에 진한 색으로 얹는다 */
-    .feat .ffill.fai{position:absolute;inset:0 auto 0 0;background:var(--greenD);opacity:.85;}
+    /* AI 사용자 겹침 바 — 전체(초록)와 확실히 구분되는 보라로 얹는다 */
+    .feat .ffill.fai{position:absolute;inset:0 auto 0 0;background:#8B5CF6;}
     /* 데스크톱: 가입/활성 추이를 1행 2열로 */
     .chart-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:860px;}
     .scard-sub{font-size:12px;color:var(--ts);margin:2px 0 10px;}
@@ -851,6 +851,8 @@ const TIER_SEGS = [
   { key: 'individual', label: '개인',     color: '#7FD6A4' },
   { key: 'family',     label: '패밀리',   color: '#43C67A' },
   { key: 'premium',    label: '프리미엄', color: '#2A8F55' },
+  // owner 없는 크론/배치(class_enrich 등) — 유저 티어와 색으로 구분
+  { key: 'system',     label: '시스템',   color: '#AEB8B2' },
 ];
 const segVal = (r, k) => Number(r.byTier?.[k]) || 0;
 
@@ -998,11 +1000,14 @@ function childAgesChart(ages) {
 
 const FEATURE_NAMES = { notice: '📋 알림장', diary: '📔 일기', ar: '📚 AR 독서',
                         todo: '✅ 할일', tuition: '💰 학원비',
-                        class_reco: '🏫 클래스 추천', class_enrich: '🏫 클래스 정보',
+                        class_reco: '✨ 클래스 추천(AI)',
+                        class_enrich: '🤖 클래스 정보 보강 (시스템 배치)',
+                        class: '🏫 클래스 탐색(찜)',
                         child_icon: '🎨 아이 아이콘',
                         schedule: '🗓️ 시간표', homework: '📝 숙제',
                         institution: '🏫 학교(원) 관리', sharing: '👨‍👩‍👧 공유' };
-const TIER_NAMES = { free: '무료', individual: '개인', family: '패밀리', premium: '프리미엄' };
+const TIER_NAMES = { free: '무료', individual: '개인', family: '패밀리', premium: '프리미엄',
+                     system: '🤖 시스템(크론)' };
 const UNIT_LABEL = { day: '일별', week: '주별', month: '월별' };
 
 function renderStats() {
@@ -1075,16 +1080,20 @@ function renderStats() {
   // 티어 표 — 평균 월환산 = tokens/(free·개인: users, 패밀리·프리미엄: subs)/기간일수×30
   const caps = data.caps || {};
   const byTier = data.tokens?.byTier || {};
-  const tierRows = ['free', 'individual', 'family', 'premium'].map(t => {
+  // system = owner 없는 크론/배치(class_enrich 등) — 사용자·캡 개념이 없어
+  // 토큰만 표기. 구버전 API(byTier.system 없음)에선 행이 0으로 나온다.
+  const tierRows = ['free', 'individual', 'family', 'premium', 'system'].map(t => {
     const info = byTier[t] || {};
     const users = Number(info.users) || 0, subs = Number(info.subs) || 0;
     const tok = tierTok[t] || 0;
+    if (t === 'system' && !tok) return '';  // 시스템 사용량 없으면 행 생략
     const perSub = t === 'family' || t === 'premium';
-    const denom = perSub ? subs : users;
+    const denom = t === 'system' ? 0 : (perSub ? subs : users);
     const avgMonthly = denom > 0 && periodDays > 0 ? tok / denom / periodDays * 30 : null;
     const cap = Number(caps[t]) || 0;
     const pct = avgMonthly != null && cap > 0 ? avgMonthly / cap * 100 : null;
-    const userCell = perSub ? `${fmtInt(subs)}구독(${fmtInt(users)}명)` : `${fmtInt(users)}명`;
+    const userCell = t === 'system' ? '–'
+      : perSub ? `${fmtInt(subs)}구독(${fmtInt(users)}명)` : `${fmtInt(users)}명`;
     return `<tr><td>${TIER_NAMES[t]}</td><td>${userCell}</td><td>${fmtTok(tok)}</td>`
       + `<td>${avgMonthly == null ? '–' : fmtTok(Math.round(avgMonthly))}</td>`
       + `<td${pct != null && pct > 100 ? ' class="over"' : ''}>${pct == null ? '–' : Math.round(pct) + '%'}</td></tr>`;
@@ -1161,7 +1170,7 @@ function renderStats() {
     </div>
     <div class="chart-2col">
       <div class="scard"><h2>기능별 사용자${featWindowNote()}</h2>
-        <div class="legend"><span><i style="background:var(--green)"></i>전체 사용</span><span><i style="background:var(--greenD)"></i>AI 사용</span></div>
+        <div class="legend"><span><i style="background:var(--green)"></i>전체 사용</span><span><i style="background:#8B5CF6"></i>AI 사용</span></div>
         ${featHtml}</div>
       <div class="scard"><h2>저장공간 (사진) — 총 ${fmtBytes(stor.total)}</h2>${storHtml}</div>
     </div>`;
